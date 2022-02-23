@@ -87,18 +87,19 @@ function getTextPoints(
 }
 
 function drawRisoLayer(points, extent, xShift, yShift, canvas) {
+  let lineLength = 5
   points.forEach((p) => {
-    canvas.strokeWeight(random(1, 2));
+    canvas.strokeWeight(random([2,3,4]));
     canvas.stroke(random(5, 50))
     canvas.point(p.x + xShift, p.y + yShift);
-    canvas.line(p.x + xShift, p.y + yShift - 5, p.x + xShift, p.y + yShift + 5)
+    // canvas.line(p.x + xShift, p.y + yShift - 5, p.x + xShift, p.y + yShift + 5)
   });
 }
 
 function NoiseMachine(min, max) {
   // std of noise on points should increase as we get closer to the bottom
   // of each letter.
-  let getStd = d3.scalePow().exponent(3).domain([min, max]).range([0, 30]);
+  let getStd = d3.scalePow().exponent(3).domain([min, max]).range([0, 45]);
   return getStd;
 }
 
