@@ -3,7 +3,6 @@ let h = 1100;
 
 let font;
 let fSize = 300; // font size
-let msgs = ["MIT", "MEDIA", "LAB"];
 let msg = "MIT\nMEDIA\nLAB"; // text to write
 let pts = []; // store path data
 let minSize = 1;
@@ -25,7 +24,6 @@ function setup() {
   blue = new Riso("mediumblue");
   orange = new Riso("sunflower");
   yellow = new Riso("yellow");
-
   red = new Riso("red");
   noLoop();
 }
@@ -90,9 +88,9 @@ function drawRisoLayer(points, extent, xShift, yShift, canvas) {
   let lineLength = 5
   points.forEach((p) => {
     canvas.strokeWeight(random([2,3,4]));
-    canvas.stroke(random(5, 50))
+    canvas.stroke(random(10, 75))
     canvas.point(p.x + xShift, p.y + yShift);
-    // canvas.line(p.x + xShift, p.y + yShift - 5, p.x + xShift, p.y + yShift + 5)
+    //canvas.line(p.x + xShift, p.y + yShift - lineLength, p.x + xShift, p.y + yShift + lineLength)
   });
 }
 
