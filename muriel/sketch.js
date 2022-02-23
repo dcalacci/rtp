@@ -87,8 +87,10 @@ function getTextPoints(
 function drawRisoLayer(points, extent, xShift, yShift, canvas) {
   let lineLength = 5
   points.forEach((p) => {
-    canvas.strokeWeight(random([2,3,4]));
-    canvas.stroke(random(10, 75))
+    canvas.strokeWeight(random([1, 2,3]));
+    // canvas.stroke(random(50, 220))
+    let strk = (map(p.y, extent.minY, extent.maxY, 220, 5))
+    canvas.stroke(randomGaussian(strk, 10))
     canvas.point(p.x + xShift, p.y + yShift);
     //canvas.line(p.x + xShift, p.y + yShift - lineLength, p.x + xShift, p.y + yShift + lineLength)
   });
@@ -97,28 +99,37 @@ function drawRisoLayer(points, extent, xShift, yShift, canvas) {
 function NoiseMachine(min, max) {
   // std of noise on points should increase as we get closer to the bottom
   // of each letter.
-  let getStd = d3.scalePow().exponent(3).domain([min, max]).range([0, 45]);
+  let getStd = d3.scalePow().exponent(3).domain([min, max]).range([0, 30]);
   return getStd;
 }
 
 function addNoiseToPoints(points, extent) {
   let height = extent.maxY - extent.minY;
-//  let min = extent.maxY - height / 3;
-  let min = extent.minY;
+ let min = extent.maxY - height / 4;
+  // let min = extent.minY;
   let max = extent.maxY;
   let noiseMachine = NoiseMachine(0, height);
 
 
   let pts = points.map((p) => {
     // create a noise "threshold" line. points below this line get scattered.
-    //let noiseLine = map(noise(p.x / 400, p.y / 400), 0, 1, min, max);
-//    let distToLine = map(abs(p.y - noiseLine), 0, height, 0, 1);
+    let noiseLine = map(noise(p.x / 400, p.y / 400), 0, 1, min, max);
+    let distToLine = map(abs(p.y - noiseLine), 0, height, 1, 0);
+    let addNoise = d3.randomBernoulli(distToLine);
 
-    return {
-      x: p.x,// + randomGaussian(0, noiseMachine((p.y - extent.minY)) /5),
-      y: p.y + abs(randomGaussian(0, noiseMachine(p.y - extent.minY))),
-    };
-  });
+    if (p.y > noiseLine || addNoise()) {
+      return {
+        x: p.x + randomGaussian(0, noiseMachine((p.y - extent.minY))/2),
+        y: p.y + abs(randomGaussian(0, noiseMachine(p.y - extent.minY))),
+      };
+    } else {
+      return {
+        x: p.x,
+        y: p.y
+      }
+    }
+    }
+);
   return pts;
 }
 
@@ -127,7 +138,7 @@ function draw() {
   let allCanvases = [blue, yellow, red];
 
   let msgs = msg.split("\n"); // split message by line
-  let noiseRange = 5; // base noise for each layer
+  let noiseRange = 10; // base noise for each layer
 
   ////////////////////////////////
   let x = 0;
@@ -143,7 +154,7 @@ function draw() {
         let xShift = randomGaussian(0, noiseRange / 2);
         let yShift = randomGaussian(0, noiseRange / 2);
         // get points to draw
-        r = getTextPoints(l, x, y, (yPointDensity = random([1,2,3])), (xPointDensity = random([1,2,3])));
+        r = getTextPoints(l, x, y, (yPointDensity = random([1,2])), (xPointDensity = random([1,2])));
         noisyPoints = addNoiseToPoints(r.points, r.extent);
 
         push();
