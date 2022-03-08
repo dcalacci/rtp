@@ -40,7 +40,11 @@ function draw() {
       let bright = brightness(color(r,g,b))
       let diceImage = dice.getBrightnessMatch(bright);
       noStroke();
+      push()
+      translate(x/pixelSize - diceImage.width, y/pixelSize - diceImage.height);
+      rotate(radians(map(random(), 0, 1, 0, 0.5)));
       image(diceImage, x, y, pixelSize, pixelSize);
+      pop()
     }
   }
   // image(dice.palette[3].diceImage, 200, 200, 100, 100);

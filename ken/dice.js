@@ -66,9 +66,10 @@ class Dice {
         mean: mean,
         diceImage: img,
         graphics: diceImg,
-        brightness: br,
+        brightness: br + 55
       });
     });
+    // let minBrightness = _.minBy(this.palette, (p) => p.brightness).brightness;
   }
 
   getMatch(r, g, b) {
