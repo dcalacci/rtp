@@ -1,9 +1,11 @@
-let w = 400;
-let h = 600;
-
-let dice;
-let diceImages = []
+let m;
+let cam;
 let diceList = ["six", "five", "four", "three", "two", "one"];
+let diceImages = []
+let w = 800;
+let h = 600
+
+let pixelSize = 20;
 function preload() {
   diceList.forEach((dFileName) => {
     diceImages.push(loadImage(`data/${dFileName}.png`));
@@ -11,51 +13,39 @@ function preload() {
 }
 
 function setup() {
-  canvas = createCanvas(800, 500);
-  let p = createP("Press Enter to change Emoji");
-  p.center("horizontal");
-  pixelDensity(1);
-  cam = createCapture(VIDEO);
-  cam.size(800, 600);
-  // cam.hide();
-  dice = new Dice();
-  dice.generate(diceImages);
-  frameRate(10)
+  createCanvas(w, h, WEBGL);
+  cam = createCamera();
+  vid = createCapture(VIDEO);
+  vid.size(w, h);
+  dice = new Dice(pixelSize)
+  frameRate(30)
 }
 
 function draw() {
+  background(0);
+  orbitControl(2, 1, 0.05);
+  ambientLight(100);
+  // Shine a light in the direction the camera is pointing
+  directionalLight(
+    240, 240, 240,
+    cam.centerX - cam.eyeX,
+    cam.centerY - cam.eyeY,
+    cam.centerZ - cam.eyeZ
+  );
   background(244);
-  cam.loadPixels();
+  vid.loadPixels();
   // cam.filter
-  let pixelSize = 10;
-  for (let x = 0; x < cam.width; x += pixelSize) {
-    for (let y = 0; y < cam.height; y += pixelSize) {
-      let index = (x + y * cam.width) * 4; // convert x&y to index //index = position in the array
-
+  for (let x = 0; x < vid.width; x += pixelSize) {
+    for (let y = 0; y < vid.height; y += pixelSize) {
+      let index = (x + y * vid.width) * 4; // convert x&y to index //index = position in the array
       // get the color of the pixel position
       // draw a rect at the corresponding x and y pixel
-      let r = cam.pixels[index];
-      let g = cam.pixels[index + 1];
-      let b = cam.pixels[index + 2];
+      let r = vid.pixels[index];
+      let g = vid.pixels[index + 1];
+      let b = vid.pixels[index + 2];
       let bright = brightness(color(r,g,b))
-      let diceImage = dice.getBrightnessMatch(bright);
-      noStroke();
-      push()
-      translate(x/pixelSize - diceImage.width, y/pixelSize - diceImage.height);
-      rotate(radians(map(random(), 0, 1, 0, 0.5)));
-      image(diceImage, x, y, pixelSize, pixelSize);
-      pop()
+      dice.updateDice(x, y, bright)
     }
   }
-  // image(dice.palette[3].diceImage, 200, 200, 100, 100);
-  // let c = dice.palette[3].diceImage.get(
-  //   map(mouseX, 0, width, 0, dice.palette[3].diceImage.width),
-  //   map(mouseY, 0, height, 0, dice.palette[3].diceImage.height)
-  // );
-  // fill(c);
-
-  // Draw a square with that color
-  // square(mouseX, mouseY, 50);
-  // image(dice.getBrightnessMatch(10), 100, 100);
-  // noLoop();
+  dice.render()
 }
