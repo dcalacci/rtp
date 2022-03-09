@@ -24,7 +24,7 @@ function setup() {
 function draw() {
   background(0);
   orbitControl(2, 1, 0.05);
-  ambientLight(50);
+  ambientLight(100);
   // Shine a light in the direction the camera is pointing
   directionalLight(
     240, 240, 240,

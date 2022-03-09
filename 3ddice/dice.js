@@ -71,7 +71,8 @@ class Dice {
         mean: mean,
         diceImage: img,
         graphics: diceImg,
-        brightness: br + 35,
+        // brightness: br - 45 // white dice
+        brightness: br + 35 // black dice
       });
     });
   }
