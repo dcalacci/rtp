@@ -20,17 +20,19 @@ function preload() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  //   resizeCanvas(windowWidth / 4, windowHeight);
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  var canvasDiv = document.getElementById("main");
+  var width = canvasDiv.offsetWidth;
+  createCanvas(width, 450);
   textSize(25);
-  stroke(255, 20);
+  stroke(255, 0);
 }
 
 function draw() {
-  background(255);
+  background(250);
   dragSegment(0, mouseX, mouseY);
   for (let i = 0; i < x.length - 1; i++) {
     dragSegment(i + 1, x[i], y[i]);
@@ -52,9 +54,8 @@ function segment(x, y, a, i) {
 
   textSize(18);
   if (i <= artistPreviews.length - 1) {
-    console.log(artistPreviews[i]);
     strokeWeight(5);
-    stroke(255, 100);
+    stroke(255, 0);
     let multiplier = 0.8;
     image(
       artistPreviews[i],
