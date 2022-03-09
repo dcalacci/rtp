@@ -1,6 +1,11 @@
 class Dice {
-  constructor() {
+  constructor(pixelSize) {
     this.palette = [];
+    this.dice = [];
+    this.pixelSize = pixelSize
+    this.generatePalette(diceImages);
+    this.generateDice()
+    console.log("n dice:", this.dice.length)
   }
 
   mean(cv) {
@@ -30,7 +35,7 @@ class Dice {
   meanColor = (cv) => {
     let h = cv.height;
     let w = cv.width;
-    console.log(w,h)
+    console.log(w, h);
     let [r, g, b] = [0, 0, 0];
     for (let i = 0; i < w; i++) {
       for (let j = 0; j < h; j++) {
@@ -53,11 +58,10 @@ class Dice {
     diceImg.noStroke();
     diceImg.image(dImage, 0, 0, 50, 50);
     diceImg.loadPixels();
-    // console.log("mean:", this.meanColor(diceImg));
     return [dImage, diceImg];
   }
 
-  generate(diceImages) {
+  generatePalette(diceImages) {
     diceImages.forEach((dImage, i) => {
       let [img, diceImg] = this.createDiceImage(dImage);
       let mean = this.meanColor(img);
@@ -67,10 +71,9 @@ class Dice {
         mean: mean,
         diceImage: img,
         graphics: diceImg,
-        brightness: br + 55
+        brightness: br + 55,
       });
     });
-    // let minBrightness = _.minBy(this.palette, (p) => p.brightness).brightness;
   }
 
   getMatch(r, g, b) {
@@ -100,5 +103,66 @@ class Dice {
       }
     });
     return bestMatch;
+  }
+
+  generateDice() {
+    console.log("Generating dice...")
+    for (let x = 0; x < w; x += this.pixelSize) {
+      for (let y = 0; y < h; y += this.pixelSize) {
+        // could make random if you wanted
+        this.dice.push(new SingleDie(this.palette[0], x, y, this.palette, this.pixelSize));
+      }
+    }
+  }
+
+  updateDice(x, y, brightness) {
+    this.dice.forEach((d) => {
+      if (x == d.x && y == d.y ) {
+        let newDie = this.getBrightnessMatch(brightness);
+        if (d.currentDie.name != newDie.name) {
+          d.update(newDie)
+        }
+      }
+    });
+  }
+
+  render() {
+    this.dice.forEach((d) => {
+      d.render();
+    });
+  }
+}
+
+class SingleDie {
+  constructor(currentDie, x, y, palette, pixelSize) {
+    console.log("Dice created");
+    this.palette = palette;
+    this.pixelSize = pixelSize;
+    this.xRotation = random(0,10) * 0.01;
+    this.yRotation = random(0,10) * 0.01;
+    this.zRotation = random(0,10) * 0.01;
+    this.targetX = 0;
+    this.targetY = 0;
+    this.targetZ = 0;
+    this.x = x;
+    this.y = y;
+    this.currentDie = currentDie;
+  }
+
+  update(newDie) {
+    this.currentDie = newDie;
+  }
+
+  render() {
+    let diceImage = this.currentDie.diceImage;
+    push();
+    noStroke();
+    translate(this.x - (w / 2), this.y - (h / 2));
+    rotateX(this.xRotation + random(-0.1, 0.1))
+    rotateY(this.yRotation + random(-0.1, 0.1))
+    rotateZ(this.zRotation + random(-0.1, 0.1))
+    texture(diceImage);
+    box(this.pixelSize * 0.75);
+    pop();
   }
 }
