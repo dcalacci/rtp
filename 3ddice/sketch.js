@@ -5,7 +5,7 @@ let diceImages = []
 let w = 800;
 let h = 600
 
-let pixelSize = 50;
+let pixelSize = 15;
 function preload() {
   diceList.forEach((dFileName) => {
     diceImages.push(loadImage(`data/${dFileName}.png`));
@@ -18,7 +18,7 @@ function setup() {
   vid = createCapture(VIDEO);
   vid.size(w, h);
   dice = new Dice(pixelSize)
-  frameRate(10)
+  frameRate(30)
 }
 
 function draw() {
@@ -45,7 +45,7 @@ function draw() {
       let b = vid.pixels[index + 2];
       let bright = brightness(color(r,g,b))
       dice.updateDice(x, y, bright)
-      dice.render()
     }
   }
+  dice.render()
 }

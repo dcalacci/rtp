@@ -71,7 +71,7 @@ class Dice {
         mean: mean,
         diceImage: img,
         graphics: diceImg,
-        brightness: br + 55,
+        brightness: br + 35,
       });
     });
   }
@@ -138,31 +138,62 @@ class SingleDie {
     console.log("Dice created");
     this.palette = palette;
     this.pixelSize = pixelSize;
-    this.xRotation = random(0,10) * 0.01;
-    this.yRotation = random(0,10) * 0.01;
-    this.zRotation = random(0,10) * 0.01;
-    this.targetX = 0;
-    this.targetY = 0;
-    this.targetZ = 0;
+    this.xRotation = 0//random(0,10) * 0.01;
+    this.yRotation = 0//random(0,10) * 0.01;
+    this.zRotation = 0//random(0,10) * 0.01;
+    this.targetX = this.xRotation;
+    this.targetY = this.yRotation;
+    this.targetZ = this.zRotation;
     this.x = x;
     this.y = y;
     this.currentDie = currentDie;
+    this.lerpAmount = 0
+    this.lerpStep = PI/30
+    this.isRotating = false;
   }
 
   update(newDie) {
+    if (this.isRotating) {
+      return;
+    }
     this.currentDie = newDie;
+    this.lerpAmount = 0;
+    //randomly changes rotation along two axes by 90 deg
+    let n_dirs = random[1,2]
+    let dirs = _.sample(['x', 'y', 'z'], n_dirs)
+    // this.targetX = this.targetX + random(-0.1, 0.1);
+    if (dirs.includes('x')) {
+      this.targetX = this.targetX + random([-PI/2, PI/2]);
+    } 
+    if (dirs.includes('y')) {
+      this.targetY = this.targetY + random([-PI/2, PI/2]);
+    } 
+    if (dirs.includes('z')) {
+      this.targetZ = this.targetZ + random([-PI/2, PI/2]);
+    }
   }
 
   render() {
     let diceImage = this.currentDie.diceImage;
+    this.lerpAmount = constrain(this.lerpAmount, 0, 1)
+    if (this.lerpAmount < 1) {
+      this.isRotating = true;
+      this.lerpAmount += this.lerpStep
+      // console.log("lerp:", this.lerpAmount)
+    } else {
+      this.isRotating = false;
+    }
+    this.xRotation = lerp(this.xRotation, this.targetX, this.lerpAmount);
+    this.yRotation = lerp(this.yRotation, this.targetY, this.lerpAmount);
+    this.zRotation = lerp(this.zRotation, this.targetZ, this.lerpAmount);
     push();
     noStroke();
     translate(this.x - (w / 2), this.y - (h / 2));
-    rotateX(this.xRotation + random(-0.1, 0.1))
-    rotateY(this.yRotation + random(-0.1, 0.1))
-    rotateZ(this.zRotation + random(-0.1, 0.1))
+    rotateX(this.xRotation)
+    rotateY(this.yRotation)
+    rotateZ(this.zRotation)
     texture(diceImage);
-    box(this.pixelSize * 0.75);
+    box(this.pixelSize)
     pop();
   }
 }
