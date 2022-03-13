@@ -5,7 +5,7 @@ let diceImages = []
 let w = 800;
 let h = 600
 
-let pixelSize = 20;
+let pixelSize = 15;
 function preload() {
   diceList.forEach((dFileName) => {
     diceImages.push(loadImage(`data/${dFileName}.png`));

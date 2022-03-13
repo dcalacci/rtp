@@ -2,16 +2,38 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>anni</title>
+	<title>ken knowlton</title>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/underscore@1.13.2/underscore-umd-min.js"></script>
+	<link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
 </head>
 
 <body>
+	<a href="/">< back</a>
+	<h1> Ken Knowlton</h1>
+	<p>I felt sort of tortured by Knowlton’s work. While I find a lot of what he did, and how he was able to do it, quite remarkable, I don’t find myself drawn to it. In fact there are many of his pieces that I find sort of painfully dull. Here’s one that I particularly disliked:</p>
+	<img style="width: 100%; margin-left: auto; margin-right: auto;" 
+	src="http://www.knowltonmosaics.com/images-slides/AEdice.jpg"></img>
+	<a href="http://www.knowltonmosaics.com/pages/AEdice.htm"><span>999 Black Dice, Ken Knowlton, 1999. </span></a>
+	<p>
+		So, to torture myself, and to face my fears, I decided to recreate it in p5. I ended up having quite a bit of fun, although I can’t say I like the aesthetic of the work any more. I chose to deviate from total recreation for this assignment and instead incorporate some interactivity, pulling source material from my webcam. Because knowlton’s piece is created with real dice, I also spent a good bit of time investigating how to render 3d objects in p5 for the first time. Here’s the result.
+	</p>
+	<p>
+		A few things I wish it did better:
+		<ul>
+			<li>
+		it’s slow. using lots of dice is very very slow! would love to find a way to speed it up. 
+			</li>
+			<li>
+
+		Given time constraints, each of these “dice” are actually just a 3d box with a single image mapped onto each side. when the dice change, the image changes and the rotation effect makes it appear like it’s rolling. p5 doesnt make it easy to make boxes with different images on each side, but I’d like the effect to be different. 
+			</li>
+		</ul>
+
+	</p>
 	<script src="dice.js"></script>
 	<script src="sketch.js"></script>
-	
 </body>
 
 </html>
