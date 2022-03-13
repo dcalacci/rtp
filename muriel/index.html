@@ -2,20 +2,102 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Sketch</title>
 
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
 
     <script src="libraries/p5.min.js"></script>
     <script src="libraries/p5.sound.min.js"></script>
     <script src="libraries/p5.riso.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/underscore@1.13.2/underscore-umd-min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.3.0/d3.min.js" integrity="sha512-NMhzM2RHzbCRO0s5VPaRC+2bW6nmNXimzC9p5sp2x19M+zzuSJ2T50dEQ7hpHkNjnX1mt8nQg1NNthwRZgsoIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.3.0/d3.min.js"
+      integrity="sha512-NMhzM2RHzbCRO0s5VPaRC+2bW6nmNXimzC9p5sp2x19M+zzuSJ2T50dEQ7hpHkNjnX1mt8nQg1NNthwRZgsoIg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
   </head>
 
   <body>
+    <a href="/">< back</a>
+    <h1>Muriel Cooper</h1>
+
+    <p>
+      I became slightly obsessed with this piece, a poster for the Media Lab. No
+      doubt a product of a mechanical process, I found the emergent lines,
+      noise, and decay that connects the different letters really engaging. How
+      much noise before something is unreadable? I couldn’t find a very
+      high-quality version of the piece, so this is what I was working with:
+    </p>
+    <img
+      style="width: 100%; margin-left: auto; margin-right: auto"
+      src="https://ucf075a8bdadd020a5f8aef9f234.previews.dropboxusercontent.com/p/thumb/ABeVX3CoyNFQnuaqSMGorRbxwfHxa6-cHpflE0e6jBNLmv8eQIOkG1vKwoT_t0nIRhlRf0jFKh63m6hv5TgcovmMc_dvKaK2EDa1j838c-eVwThZf-JhaiQymgnHl0S5nr-uBQpHwdNd6uT4HEbFG2q03dQnnlwDN-lv_7g2WdWMceYMkeOYyfvpiPKDpgTw3phrVO2kr-riTNF3zZIH-xhV95vUbLX-ukyF-SKMEsoi5jlZjMjQTfMrSIQSc7lyue9jFNdZCjKDNtKKh5m7VGXPj6PkftqqWJEGiSzkOfObXokIWEK6FIeqqmQTYwXuFScucfeRqky_N0icll1U_DrP17cg-uyG0vrRlENfeRTaGEKiw56GMRPZGSIu9rzcZNLSE4XmdTv9qt_fA_CboZOHpXxGRusgh3GU8Vd8WWBFnA/p.png"
+    />
+    <p>
+      It struck me as looking sort of like a riso print, so I scrounged around
+      for some examples of “making riso prints” in p5, which, luckily,
+      <a href="https://antiboredom.github.io/p5.riso/"
+        >Sam Lavigne and company had done for me.</a
+      >
+
+      To start, I turned each letter into a dot array at a certain resolution.
+      Then, added some noise to each point’s alpha and position, dependent on
+      how far down the letter it is. Adding some additional color layers gives a
+      nice effect, too.
+    </p>
+    <div>
+      <img
+        style="width: 30%"
+        src="https://uc765d675f4869cefb0f50cf1dd0.previews.dropboxusercontent.com/p/thumb/ABcgcp6rQS86e7OqwMGYIjObAwI2eoAUVSq-BNDVJJ_wsoiV5vZpCK8C6fc1iCrdzd64LOeMn2xSLNXSHkUTjKTH8RvP4g_IZ_sZMwD1fCkEujuKRUU4wskUmXexoWuFkK5TUSKmqfb9kNP3WCpvTmdTpI0Q6ZDf0XvbUdPthfOWdb7VlLzT-SxR6Ku8Ux-jRHGLnzjT36dVxiaBmamQv-ycCpl4LXbKSnTZ45EKZAvPFSq-mVrFqUn08PZ4CLsrV85DnFtv3rYVpEeAGCuftzGWL1zQsMOHarqVBALUXUbADyxR3twNanKjpkq04BOzL2eIC99Wbh6tHcgax74lYWUT1Cxd3AqrP4SoWNLbZzoTa06QnMB-EQiu092c_XXby1QXeU2TGQWzX-gjVjmzmYqYiRi80cAAlyZr65fPtM9sV7wync7ygheDPO3HlaxQyH4/p.png"
+      />
+      <img
+        style="width: 30%"
+        src="https://uc0d18768b3f14104eebdf095f79.previews.dropboxusercontent.com/p/thumb/ABfOMvS4UAZxG17ReWSZoAKwdiKlpXFzunO9Ign54Hv04-4TKwGVQTzWy48K1d99ItwStuEgQSC5h_FgkoXJSKyseuGMnbxx8O1i_4L-CY3xxNr1XvkK9Js10iVTAOH7JooEIn5b3_8sWM1lvJEixJaJ4DmS-xKjTtK7qUCya3qwNsMPuhc5foargPgAGOdJNYnLL_qUNSM6YuipOw2_Gw6KQFCwXUsCz2DVySaJd2zYlE7xoocTHOEnEzNSi3v0R3ImIJOkyFXbYoN41e3EpCWZKhuHuAQtSIAvLj_kqMIM1QV5XInoxCYZbPh49LHyPhnl9-Ith2ZPb6EKG6lsmAhOrEaGBeoK7NHXOj6TywrfsbllwbdC2TorpV1oskktra6t5BjBkEqFtAngqgh_XiR0jSg6IGiWgz0gPE6bUROeaMVid382FTl5k5i4dgg4Img/p.png"
+      />
+      <img
+        style="width: 30%"
+        src="https://uc186194d845ba2ebff111b4f891.previews.dropboxusercontent.com/p/thumb/ABeeNHRMRVMoMHqQWy_v6xNZKNyY3-npSSrjf3MGj5zje7kBggWc2HX6f3j0lwNI-t1iAMmgjrdKravYCHjjxb0QUhMAWUPV17AjSZBHyrE79gYdB5EwAr9eIInLPnzaLxx-d9idfL9K6vDbElv9SwaN0P4CqFeqd-X5eryEvBCNoUOSvMPQwGETYW5SSsvB-Ec-_7YuSh_F53kL7lqcZPdQ26yY2JNnonOT1TNT225w_Wk2FWZ2FZWH_MgnJNbL2IMgkYOGOHUoRaASAhOfTSWyMF4ggwz4LEyFG_R1UZu4xqrTuYmN1u1BFXdaNBzonn4L_X7mmhP1skEu6SWN0TIxTdh3DCR9byUaVNEp-61U24_ipLUl7tV6fmRZxS1X12GbDtJozyovrJbVxA30zUmraxdHBfk_s9vl5KQzmONQ02c05X4_WRZrdVo6pBoFAVY/p.png"
+      />
+    </div>
+    <p>
+      This isn’t quite right. if you look at the example above, the “noise”
+      follows a kind of line. This led me to create a “noise threshold”
+      generated using perlin noise that cuts through each character, making a
+      nice effect IMO, but it’s quite harsh (left). I fixed this by increasing
+      the likelihood that points follow some random noise the closer they are to
+      this line (right)
+    </p>
+    <div
+      style="
+        width: 100%;
+        display: grid;
+        grid-template-columns: 45% 45%;
+        justify-content: space-evenly;
+        justify-items: center;
+        align-items: top;
+      "
+    >
+      <div>
+        <img style="width: 100%" src="./img/curve1.png" />
+        <span>A strict line is too harsh...</span>
+      </div>
+      <div>
+        <img style="width: 100%" src="./img/curve2.png" />
+        <span
+          >But increasing the likelihood of random “clouding” of points as they
+          approach the same line is much smoother and closer</span
+        >
+      </div>
+    </div>
+    <p>
+      This came pretty close in my view. Mapping point’s alpha to the y-axis
+      withine ach letter also helped. If I were to spend more time—I think the
+      points need to be more spatially contained, and alpha should be more
+      liberally applied past the “noise line” instead of randomness.
+    </p>
     <script src="sketch.js"></script>
   </body>
 </html>

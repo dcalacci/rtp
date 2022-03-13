@@ -178,6 +178,6 @@ function draw() {
 
 function mousePressed() {
   // when the user clicks, export the current image and stop
-  exportRiso();
+  // exportRiso();
   noLoop();
 }
