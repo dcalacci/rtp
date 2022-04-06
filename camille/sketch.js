@@ -1,11 +1,12 @@
-let poem = "This is my poem, see me roar"
+// let poem = "This is my poem, see me roar"
+let poem = "the sci-fi library lives!"
 let cam;
 
 let DRAW_RECTS = false
 let w = 800;
 let h = 600
 let font;
-let fSize = w / 50;
+let fSize = w / 45;
 
 let letters = []
 
@@ -13,7 +14,7 @@ let letters = []
 // y, x, brightness avg (draw loop)
 
 let pixelSize = 5
-let vidPixels = Array(h).fill().map(() => Array(w));
+let vidPixels = Array(h).fill(255).map(() => Array(w).fill(255));
 let nPixels = 0
 var averageBrightness = 0
 var calculatedAverage = false
@@ -28,17 +29,22 @@ class Letter {
 
   update(vidPixels) {
     // console.log("updating... position:", this.pos)
-    var yPixel = Math.ceil(this.pos[1] / pixelSize) * pixelSize
-    var xPixel = Math.ceil(this.pos[0] / pixelSize) * pixelSize
+    var yPixel = Math.abs(Math.ceil(this.pos[1] / pixelSize) * pixelSize)
+    var xPixel = Math.abs(Math.ceil(this.pos[0] / pixelSize) * pixelSize)
 
     if (vidPixels[yPixel]) {
       let vidPixel = vidPixels[yPixel][xPixel]
       // while it's on dark, move it upwards
       while (vidPixel < averageBrightness) {
         if (vidPixels[yPixel]) {
-          this.pos[1] -= this.velocity
-          yPixel = Math.ceil(this.pos[1] / pixelSize) * pixelSize
-          xPixel = Math.ceil(this.pos[0] / pixelSize) * pixelSize
+          this.pos[1] -= 1
+          let yPixelOld = yPixel
+          yPixel = Math.abs(Math.ceil(this.pos[1] / pixelSize) * pixelSize)
+          if (!vidPixels[yPixel]) {
+            yPixel = yPixelOld
+          }
+          xPixel = Math.abs(Math.ceil(this.pos[0] / pixelSize) * pixelSize)
+
           vidPixel = vidPixels[yPixel][xPixel]
         }
       }
@@ -56,7 +62,6 @@ class Letter {
   }
 
   draw() {
-
     fill(0)
     text(this.letter, this.pos[0], this.pos[1])
   }
@@ -77,15 +82,23 @@ function setup() {
   // textAlign(CENTER, CENTER);
   frameRate(30)
 
-  let xPos = random(5, w * 0.75)
-  for (let i = 0; i < poem.length; i++) {
 
-    letters.push(new Letter(poem[i],
-      [
-        xPos,
-        random(0, h / 3)
-      ]))
-    xPos += textWidth(poem.charAt(i))
+  let poemWidth = textWidth(poem) * 1.1
+  let nPoems = Math.floor(w / poemWidth)
+  for (let n = 0; n < nPoems; n++) {
+    // start at end of last poem
+    let xPos = n * poemWidth;
+    // let xPos = random(xStart, xStart + 10)
+    for (let i = 0; i < poem.length; i++) {
+      if (xPos < w - 10) {
+        letters.push(new Letter(poem[i],
+          [
+            xPos,
+            random(pixelSize, h / 3)
+          ]))
+        xPos += textWidth(poem.charAt(i))
+      }
+    }
   }
 }
 
@@ -96,7 +109,6 @@ function draw() {
   // update video
   vid.loadPixels();
   rectMode(RADIUS)
-  // cam.filter
   for (let x = 0; x < vid.width; x += pixelSize) {
     for (let y = 0; y < vid.height; y += pixelSize) {
       let index = (x + y * vid.width) * 4; // convert x&y to index //index = position in the array
@@ -124,37 +136,9 @@ function draw() {
     calculatedAverage = true
     console.log("average brightness:", averageBrightness)
   } else if (calculatedAverage) {
-
     letters.forEach((l) => {
       l.update(vidPixels)
       l.draw()
-      // var yBlock = Math.ceil(l.pos[1] / pixelSize) * pixelSize
-      // var xBlock = Math.ceil(l.pos[0] / pixelSize) * pixelSize
-      // let stop = false
-      // if (vidPixels[yBlock]) {
-      //   let vidPixel = vidPixels[yBlock][xBlock]
-      //   stop = vidPixel < averageBrightness
-      // }
-      // if (!stop) {
-      // } else if (l.pos[1] > h - 5) {
-      //   l.pos[1] = 0
-      // }
-      // l.draw()
     })
   }
-
-  // // cam.filter
-  // for (let x = 0; x < vid.width; x += pixelSize) {
-  //   for (let y = 0; y < vid.height; y += pixelSize) {
-  //     let index = (x + y * vid.width) * 4; // convert x&y to index //index = position in the array
-  //     // get the color of the pixel position
-  //     // draw a rect at the corresponding x and y pixel
-  //     let r = vid.pixels[index];
-  //     let g = vid.pixels[index + 1];
-  //     let b = vid.pixels[index + 2];
-  //     let bright = brightness(color(r, g, b))
-  //     dice.updateDice(x, y, bright)
-  //   }
-  // }
-  // dice.render()
 }
