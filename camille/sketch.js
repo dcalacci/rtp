@@ -24,8 +24,6 @@ class Letter {
   }
 
   draw() {
-    textFont(font);
-    textSize(fSize);
     text(this.letter, this.pos[0], this.pos[1])
   }
 }
@@ -39,22 +37,28 @@ function preload() {
 function setup() {
   // createCanvas(w, h, WEBGL);
   // cam = createCamera();
+  //
+  textFont(font);
+  textSize(fSize);
   createCanvas(w, h)
   vid = createCapture(VIDEO);
   vid.size(w, h);
-  textAlign(CENTER, CENTER);
+  // textAlign(CENTER, CENTER);
   frameRate(30)
 
-  let base = random(5, w * 0.75)
+  let xPos = random(5, w * 0.75)
   for (let i = 0; i < poem.length; i++) {
-    let prevLetters = poem.slice(0, i + 1)
+
     letters.push(new Letter(poem[i],
       [
         // I'm not sure why I need to multiply here to get better spacing,
         // and the spacing between skinny letters is poor 
-        base + (textWidth(prevLetters) * 2),
+        xPos,
         random(0, h / 3)
       ]))
+    xPos += textWidth(poem.charAt(i))
+
+    // let prevLetters = poem.slice(0, i + 1)
   }
 }
 
