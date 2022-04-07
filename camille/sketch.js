@@ -3,12 +3,16 @@ let poem = "the sci-fi library lives!"
 let cam;
 
 let DRAW_RECTS = false
-let w = 800;
-let h = 600
+var w = window.innerWidth;
+var h = window.innerHeight;
+// let w = 800;
+// let h = 600
 let font;
 let fSize = w / 45;
 
 let letters = []
+
+let vid;
 
 
 // y, x, brightness avg (draw loop)
@@ -19,11 +23,30 @@ let nPixels = 0
 var averageBrightness = 0
 var calculatedAverage = false
 
+
+
+function mousePressed() {
+  if (mouseX > 0 && mouseX < 100 && mouseY > 0 && mouseY < 100) {
+    let fs = fullscreen();
+    fullscreen(!fs);
+  }
+}
+
+window.onresize = function() {
+  // assigns new values for width and height variables
+  w = window.innerWidth;
+  h = window.innerHeight;
+  resizeCanvas(w, h);
+  vid.size(w, h)
+  // averageBrightness = 0;
+  // calculatedAverage = false;
+}
+
 class Letter {
   constructor(letter, initPos) {
     this.letter = letter;
     this.pos = initPos;
-    this.velocity = random(2, 5)
+    this.velocity = random(4, 7)
     console.log("Created letter", this.letter)
   }
 
@@ -33,7 +56,6 @@ class Letter {
     var xPixel = Math.abs(Math.floor(this.pos[0] / pixelSize) * pixelSize)
 
     let thresholdBrightness = max(averageBrightness / 2, 20)
-    console.log("threshold brightness:", thresholdBrightness)
 
     if (vidPixels[yPixel]) {
       let vidPixel = vidPixels[yPixel][xPixel]
@@ -146,3 +168,4 @@ function draw() {
     })
   }
 }
+
