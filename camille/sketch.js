@@ -29,35 +29,39 @@ class Letter {
 
   update(vidPixels) {
     // console.log("updating... position:", this.pos)
-    var yPixel = Math.abs(Math.ceil(this.pos[1] / pixelSize) * pixelSize)
-    var xPixel = Math.abs(Math.ceil(this.pos[0] / pixelSize) * pixelSize)
+    var yPixel = Math.abs(Math.floor((this.pos[1] + 10) / pixelSize) * pixelSize)
+    var xPixel = Math.abs(Math.floor(this.pos[0] / pixelSize) * pixelSize)
+
+    let thresholdBrightness = max(averageBrightness / 2, 20)
+    console.log("threshold brightness:", thresholdBrightness)
 
     if (vidPixels[yPixel]) {
       let vidPixel = vidPixels[yPixel][xPixel]
       // while it's on dark, move it upwards
-      while (vidPixel < averageBrightness) {
+      while (vidPixel < thresholdBrightness && this.pos[1] > 10) {
         if (vidPixels[yPixel]) {
           this.pos[1] -= 1
           let yPixelOld = yPixel
-          yPixel = Math.abs(Math.ceil(this.pos[1] / pixelSize) * pixelSize)
+          yPixel = Math.abs(Math.floor((this.pos[1] + 10) / pixelSize) * pixelSize)
           if (!vidPixels[yPixel]) {
             yPixel = yPixelOld
           }
-          xPixel = Math.abs(Math.ceil(this.pos[0] / pixelSize) * pixelSize)
+          xPixel = Math.abs(Math.floor(this.pos[0] / pixelSize) * pixelSize)
 
           vidPixel = vidPixels[yPixel][xPixel]
         }
       }
 
-      this.pos[1] += this.velocity
-      // if (vidPixel > averageBrightness) {
-      //   this.pos[1] += this.velocity
-      // }
-      if (this.pos[1] > h - 5) {
-        console.log("looping")
-        this.pos[1] = 0
-      }
     }
+    this.pos[1] += this.velocity
+    // if (vidPixel > averageBrightness) {
+    //   this.pos[1] += this.velocity
+    // }
+    if (this.pos[1] > h + 10) {
+      console.log("looping")
+      this.pos[1] = 0
+    }
+
 
   }
 
@@ -94,7 +98,7 @@ function setup() {
         letters.push(new Letter(poem[i],
           [
             xPos,
-            random(pixelSize, h / 3)
+            random(-pixelSize, -h / 3)
           ]))
         xPos += textWidth(poem.charAt(i))
       }
@@ -119,7 +123,7 @@ function draw() {
       let b = vid.pixels[index + 2];
       let bright = brightness(color(r, g, b))
       vidPixels[y][x] = bright
-      if (!calculatedAverage) {
+      if (!calculatedAverage && bright != 0) {
         nPixels += 1
         averageBrightness += bright
       }
@@ -132,7 +136,7 @@ function draw() {
     }
   }
   if (!calculatedAverage && averageBrightness > 0) {
-    averageBrightness = (averageBrightness / nPixels) * 255
+    averageBrightness = (averageBrightness / nPixels)
     calculatedAverage = true
     console.log("average brightness:", averageBrightness)
   } else if (calculatedAverage) {
