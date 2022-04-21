@@ -1,5 +1,22 @@
 // let poem = "This is my poem, see me roar"
-let poem = "the sci-fi library lives!"
+// let poem = "the sci-fi library lives!"
+let poem = "I like talking with you, simply that conversing, a turning-with or-around, as in \
+your turning around to face me \
+suddenly, saying \
+Come, and I turn \
+with you, for a sometime \
+hand under my under-things, \
+and you telling me \
+what you would do, where, \
+on what part of my body \
+you might talk to me differently. \
+At your turning, \
+each part of my body turns to verb. \
+We are the opposite oftongue-tied, as if there were such an \
+antonym; we are synonyms \
+for limbs’ loosening of syntax, \
+and yet turn to nothing; \
+It’s just talk."
 let cam;
 
 let DRAW_RECTS = false
@@ -35,7 +52,7 @@ class Letter {
     if (vidPixels[yPixel]) {
       let vidPixel = vidPixels[yPixel][xPixel]
       // while it's on dark, move it upwards
-      while (vidPixel < averageBrightness) {
+      while (vidPixel < 50 && yPixel > 20) {
         if (vidPixels[yPixel]) {
           this.pos[1] -= 1
           let yPixelOld = yPixel
@@ -84,12 +101,14 @@ function setup() {
 
 
   let poemWidth = textWidth(poem) * 1.1
-  let nPoems = Math.floor(w / poemWidth)
+  let nPoems = max(Math.floor(w / poemWidth), 1)
   for (let n = 0; n < nPoems; n++) {
     // start at end of last poem
     let xPos = n * poemWidth;
+    let firstLetter = int(random(0, poem.length / 2))
+    console.log("first letter:", firstLetter)
     // let xPos = random(xStart, xStart + 10)
-    for (let i = 0; i < poem.length; i++) {
+    for (let i = firstLetter; i < poem.length; i++) {
       if (xPos < w - 10) {
         letters.push(new Letter(poem[i],
           [

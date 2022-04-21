@@ -8,8 +8,8 @@ for (let i = 0; i < segNum; i++) {
   y[i] = 0;
 }
 
-let artists = ["ken", "muriel", "anni"];
-let artistNames = ["ken knowlton", "muriel cooper", "anni albers"];
+let artists = ["ken", "muriel", "anni", "john", "vera", "camille"];
+let artistNames = ["ken knowlton", "muriel cooper", "anni albers", "john whitney", "vera molnar", "camille utterback"];
 let artistPreviews;
 
 function preload() {
@@ -64,7 +64,7 @@ function segment(x, y, a, i) {
       segLength * multiplier,
       segLength * multiplier
     );
-    text(artistNames[i], 0, segLength * multiplier + 10);
+    text(artistNames[i], 0, segLength * multiplier + 15);
   } else {
     textSize(25);
     strokeWeight(10);

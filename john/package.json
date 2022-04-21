@@ -1,0 +1,14 @@
+{
+  "name": "@dcalacci/recreating-the-past-week-2-john-whitney",
+  "main": "3976fd75744b1001@984.js",
+  "version": "984.0.0",
+  "homepage": "https://observablehq.com/@dcalacci/recreating-the-past-week-2-john-whitney",
+  "author": {
+    "name": "Dan Calacci",
+    "url": "https://observablehq.com/@dcalacci"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4"
+  }
+}

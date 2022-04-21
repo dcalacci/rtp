@@ -1,0 +1,14 @@
+{
+  "name": "@dcalacci/rtp-vera-molnar-triangle",
+  "main": "3e3b3ca01e5d5258@932.js",
+  "version": "932.0.0",
+  "homepage": "https://observablehq.com/@dcalacci/rtp-vera-molnar-triangle",
+  "author": {
+    "name": "Dan Calacci",
+    "url": "https://observablehq.com/@dcalacci"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4"
+  }
+}
