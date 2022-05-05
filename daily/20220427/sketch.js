@@ -10,7 +10,7 @@ let BODY_MAX_LINES = 500;
 let BODY_STYLE = 1;
 let BODY_ROTATION_SPEED = 0.02
 
-let DRAW_GRID = false// if true, draw the grid
+let DRAW_GRID = true// if true, draw the grid
 let N_BODIES_IN_CELL = 1
 let GRID_STROKE_WEIGHT = 0.5
 let GRID_MAX_OPACITY = 75 // max opacity of grid lines
@@ -44,7 +44,7 @@ function setup() {
 
   gridSeed = random(10003)
 
-  let w = width / N_CELLS;
+  let w = WIDTH / N_CELLS;
   noFill();
   for (let i = 0; i < N_CELLS * 1.2; i++) {
     for (let j = 0; j < N_CELLS * 1.2; j++) {
@@ -166,9 +166,5 @@ class Soma {
 
     }
     return r
-    // this.r = (
-    //   this.w * noise(frameCount / this.nm + ind) *
-    //   this.w * 0.1 + sin(frameCount / this.sm + ind) *
-    //   this.w * 0.05
   }
 }

@@ -1,10 +1,10 @@
 // var gui = createGui('blobs');
 
-var COLOR_MODE = 'layers'
-var MAX_LENGTH = 70;
-var MIN_LENGTH = 20;
+var COLOR_MODE = 'random'
+var MAX_LENGTH = 100;
+var MIN_LENGTH = 30;
 var ALLOW_COLLISION = true
-var NOISE_RESOLUTION = 200
+var NOISE_RESOLUTION = 400
 var VELOCITY_SCALER = 2.0
 var BLOB_VERTICES = 10
 var BLOB_1 = 40
@@ -19,6 +19,10 @@ var n, s, maxR;
 var particleImage;
 
 let colorIndex = 0
+
+function mousePressed() {
+  save("saved.png")
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -63,8 +67,6 @@ function draw() {
   drawBlob(mask, width / 2, height / 2, BLOB_VERTICES, BLOB_1, BLOB_2, 14, 20)
 
   if (s > 1) {
-    console.log(s)
-
     if (particles.length != 0) {
       for (let i = 0; i < particles.length; i++) {
         var p = particles[i];
@@ -86,8 +88,11 @@ function draw() {
   // image(particleImage, 0, 0)
   // particleImage.mask(mask)
   // masked = particleImage.get().mask(mask)
+  // if (particles.length < 2) {
   (masked = particleImage.get()).mask(mask)
   image(masked, 0, 0)
+
+  // }
 }
 
 function initParticles(img, c) {
