@@ -6,7 +6,7 @@ let H = 834
 
 let N_FLIES = 2000
 let FLY_SIZE = 15
-let UPDATE_FREQ = 120
+let UPDATE_FREQ = 15
 let flies = []
 let fly1;
 let fly2;
@@ -217,7 +217,7 @@ function processImage(_capimg, _dstimg) {
 
 // edge detection }}
 
-// from https://openprocessing.org/sketch/903237
+// with big help from from https://openprocessing.org/sketch/903237
 
 class Fly {
   constructor() {
@@ -289,7 +289,7 @@ class Fly {
     this.y += sin(this.t);
 
     if (abs(this.targetX - this.x) <= 1 && abs(this.targetY - this.y) <= 1) {
-      this.jiggleTargetPos(2);
+      this.jiggleTargetPos(5);
       if (random(10) < 3) {
         this.restTime = floor(random(1000));
       }
