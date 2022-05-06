@@ -353,6 +353,7 @@ class Circle extends Soma {
     this.b = w / 4
     this.vx = 1
     this.vy = 1
+    this.n_frames = 120
   }
 
   update() {
@@ -361,12 +362,12 @@ class Circle extends Soma {
 
       if (0 < this.frame && this.frame < this.n_frames / 2) {
         let nrm = norm(this.frame, 0, this.n_frames - 1);
-        this.vx = lerp(1, 4, es.backInOut(nrm))
-        this.vy = lerp(1, 4, es.backInOut(nrm))
+        this.vx = lerp(0, 4, es.backInOut(nrm))
+        this.vy = lerp(0, 4, es.backInOut(nrm))
       } else if (this.n_frames / 2 <= this.frame && this.frame < this.n_frames - 1) {
         let nrm = norm(this.frame, 0, this.n_frames - 1);
-        this.vx = lerp(4, 1, es.backInOut(nrm))
-        this.vy = lerp(4, 1, es.backInOut(nrm))
+        this.vx = lerp(4, 0, es.backInOut(nrm))
+        this.vy = lerp(4, 0, es.backInOut(nrm))
       }
 
       if (this.frame > this.n_frames) {
@@ -383,8 +384,9 @@ class Circle extends Soma {
     strokeWeight(this.strokeWeight)
     translate(this.x, this.y)
     for (let i = 0; i < 360; i += 1) {
-      let x = map(cos(i), -1, 1, this.a, this.b) * sin(this.vx)
-      let y = map(sin(i), -1, 1, this.a, this.b) * cos(this.vy)
+      let vx = map(i, 0, 360, 0, PI)
+      let x = map(cos(i), -1, 1, this.a, this.b) + (this.vx * 5 * cos(vx))
+      let y = map(sin(i), -1, 1, this.a, this.b) // + (this.vx * sin(vx))
       point(x, y);
     }
     pop()
