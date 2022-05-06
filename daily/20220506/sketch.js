@@ -3,11 +3,13 @@ let FRAME = true
 let N_CELLS = 5
 let WIDTH = 800
 let HEIGHT = 800
-let bgCol = "#f9f9f9"
+
+let UPDATE_PROBABILITY = 0.05
+let bgCol = "#F8F6F5"
 
 let es = new p5.Ease();
 
-let colors = ["#FFA69E", "#9CAFB7", "#344055", "#E9EB9E", "#A30000", "#303030"]
+let COLORS = ["#0B3EB2", "#FFC109", "#FFA7B6"]
 
 function mousePressed() {
   save(new Date().toJSON() + ".png")
@@ -18,6 +20,7 @@ function preload() {
 }
 
 let bodies = []
+let wave1;
 
 function setup() {
   // blendMode(BLUR)
@@ -43,8 +46,10 @@ function setup() {
     end = N_CELLS - 1
   }
 
+
   for (let i = start; i <= end; i += 1) {
-    let all_bodies = [Triangle, Wave, Wave, WavyTriangle, WavyTriangle]
+    // let all_bodies = [Triangle, Wave, WavyTriangle]
+    let all_bodies = [Circle]
     for (let j = start; j <= end; j += 1) {
       let x = j * step
       let y = i * step;
@@ -52,7 +57,7 @@ function setup() {
       bodies.push(new body(x, y, step))
     }
   }
-  console.log(bodies)
+
 }
 
 
@@ -65,8 +70,6 @@ function draw() {
     b.update()
     b.display()
   }
-
-
 }
 
 class Soma {
@@ -75,16 +78,18 @@ class Soma {
     this.y = y;
     this.dMax = w;
     this.d = 0.25 * w;
-    this.col = random(colors);
     this.fr = random(10284701987);
     this.type = 0
     this.angle_init = 0;
     this.max_angle = this.angle_init + random(PI / 2, TWO_PI)
     this.frame = 0
-    this.n_frames = 40
+    this.n_frames = 60
     this.isUpdating = false
-    this.updateProbability = 0.01 // update probability for any frame
+    this.updateProbability = UPDATE_PROBABILITY // update probability for any frame
     this.strokeWeight = 3
+    this.direction = random([-1, 1])
+
+    this.color = random(COLORS)
   }
   startUpdate() {
     this.isUpdating = true
@@ -96,6 +101,10 @@ class Soma {
 
   update() {
     this.frame += 1
+  }
+
+  display() {
+    stroke(this.color)
   }
 }
 
@@ -129,6 +138,7 @@ class Triangle extends Soma {
   }
 
   display() {
+    super.display()
     push()
     noFill()
     strokeWeight(this.strokeWeight)
@@ -163,12 +173,15 @@ class Wave extends Soma {
     this.max_f = random(2, 6)
     this.f = 1
     this.a = 0
-    this.d = 0
+    this.d = w / 4
     this.strokeWeight = 4
-    this.angle = TAU / random([1, 2, 3, 4, 5, 6])
+    this.angle = TAU / random([1, 2, 3, 4, 5, 6, 7, 8])
+    this.rotate = random([true, false])
 
   }
   display() {
+
+    super.display()
     push()
     noFill()
     strokeWeight(this.strokeWeight)
@@ -178,6 +191,7 @@ class Wave extends Soma {
     beginShape()
     let y2 = this.d
     let y1 = -this.d
+    console.log(y2, y1)
     for (let i = y1; i < y2; i++) {
       let xx = map(i, y1, y2, 0, TWO_PI)
       let yy = i;
@@ -196,10 +210,16 @@ class Wave extends Soma {
         let nrm = norm(this.frame, 0, (this.n_frames / 2));
         this.a = lerp(this.min_a, this.max_a, es.quarticInOut(nrm))
         this.f = lerp(this.min_f, this.max_f, es.doubleExponentialSigmoid(nrm))
+        if (this.rotate)
+          this.angle = lerp(this.angle_init, this.max_angle, es.backInOut(nrm)) * this.direction
+
       } else if (this.n_frames / 2 <= this.frame && this.frame < this.n_frames - 1) {
         let nrm = norm(this.frame, this.n_frames / 2, this.n_frames - 1);
         this.a = lerp(this.max_a, this.min_a, es.quarticInOut(nrm))
         this.f = lerp(this.max_f, this.min_f, es.circularInOut(nrm))
+        if (this.rotate)
+          this.angle = lerp(this.max_angle, this.angle_init, es.backInOut(nrm)) * this.direction
+
       }
 
       if (this.frame > this.n_frames) {
@@ -221,7 +241,6 @@ class WavyTriangle extends Soma {
     this.min_a = random(2, 5)
     this.max_a = this.min_a + random(5, 10)
     this.a = this.min_a
-    this.updateProbability = 0.004
 
     this.waves = []
     this.initializedWaves = false
@@ -259,6 +278,7 @@ class WavyTriangle extends Soma {
   }
 
   display() {
+    super.display()
     push()
     noFill()
     strokeWeight(this.strokeWeight)
@@ -301,6 +321,8 @@ class WavyTriangle extends Soma {
           let w = new Wave(x_mid, y_mid, dist, i)
           w.d = dist / 2
           w.angle = -angle
+          w.rotate = false
+          w.color = this.color
           this.waves.push(w)
           if (this.waves.length == n_points) {
 
@@ -321,6 +343,55 @@ class WavyTriangle extends Soma {
   }
 
 }
+
+class Circle extends Soma {
+  constructor(x, y, w) {
+    super(x, y, w)
+    this.direction = random([-1, 1])
+    this.strokeWeight = 4;
+    this.a = -w / 4;
+    this.b = w / 4
+    this.vx = 1
+    this.vy = 1
+  }
+
+  update() {
+    if (this.isUpdating) {
+      super.update()
+
+      if (0 < this.frame && this.frame < this.n_frames / 2) {
+        let nrm = norm(this.frame, 0, this.n_frames - 1);
+        this.vx = lerp(1, 4, es.backInOut(nrm))
+        this.vy = lerp(1, 4, es.backInOut(nrm))
+      } else if (this.n_frames / 2 <= this.frame && this.frame < this.n_frames - 1) {
+        let nrm = norm(this.frame, 0, this.n_frames - 1);
+        this.vx = lerp(4, 1, es.backInOut(nrm))
+        this.vy = lerp(4, 1, es.backInOut(nrm))
+      }
+
+      if (this.frame > this.n_frames) {
+        this.isUpdating = false;
+        this.frame = 0
+      }
+    }
+  }
+
+  display() {
+    super.display()
+    push()
+    noFill()
+    strokeWeight(this.strokeWeight)
+    translate(this.x, this.y)
+    for (let i = 0; i < 360; i += 1) {
+      let x = map(cos(i), -1, 1, this.a, this.b) * sin(this.vx)
+      let y = map(sin(i), -1, 1, this.a, this.b) * cos(this.vy)
+      point(x, y);
+    }
+    pop()
+
+  }
+}
+
 
 // let dist = Math.hypot(p1[0] - p2[0], p1[1] - p2[1])
 // for (let i = 0; i <=dist; i++) {
