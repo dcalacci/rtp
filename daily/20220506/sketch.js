@@ -4,7 +4,7 @@ let N_CELLS = 5
 let WIDTH = 800
 let HEIGHT = 800
 
-let UPDATE_PROBABILITY = 0.05
+let UPDATE_PROBABILITY = 0.002
 let bgCol = "#F8F6F5"
 
 let es = new p5.Ease();
@@ -48,8 +48,8 @@ function setup() {
 
 
   for (let i = start; i <= end; i += 1) {
-    // let all_bodies = [Triangle, Wave, WavyTriangle]
-    let all_bodies = [Circle]
+    let all_bodies = [Triangle, Wave, WavyTriangle, Circle]
+    // let all_bodies = [Circle]
     for (let j = start; j <= end; j += 1) {
       let x = j * step
       let y = i * step;
@@ -191,7 +191,6 @@ class Wave extends Soma {
     beginShape()
     let y2 = this.d
     let y1 = -this.d
-    console.log(y2, y1)
     for (let i = y1; i < y2; i++) {
       let xx = map(i, y1, y2, 0, TWO_PI)
       let yy = i;
@@ -351,9 +350,8 @@ class Circle extends Soma {
     this.strokeWeight = 4;
     this.a = -w / 4;
     this.b = w / 4
-    this.vx = 1
-    this.vy = 1
-    this.n_frames = 120
+    this.c = 0
+    this.n_frames = 180
   }
 
   update() {
@@ -362,12 +360,14 @@ class Circle extends Soma {
 
       if (0 < this.frame && this.frame < this.n_frames / 2) {
         let nrm = norm(this.frame, 0, this.n_frames - 1);
-        this.vx = lerp(0, 4, es.backInOut(nrm))
-        this.vy = lerp(0, 4, es.backInOut(nrm))
+        this.c = lerp(0, 10, es.linear(nrm))
+        // this.vx = lerp(1, 10, es.backInOut(nrm))
+        // this.vy = lerp(1, 10, es.backInOut(nrm))
       } else if (this.n_frames / 2 <= this.frame && this.frame < this.n_frames - 1) {
         let nrm = norm(this.frame, 0, this.n_frames - 1);
-        this.vx = lerp(4, 0, es.backInOut(nrm))
-        this.vy = lerp(4, 0, es.backInOut(nrm))
+        this.c = lerp(10, 0, es.linear(nrm))
+        // this.vx = lerp(10, 1, es.backInOut(nrm))
+        // this.vy = lerp(10, 1, es.backInOut(nrm))
       }
 
       if (this.frame > this.n_frames) {
@@ -383,24 +383,36 @@ class Circle extends Soma {
     noFill()
     strokeWeight(this.strokeWeight)
     translate(this.x, this.y)
-    for (let i = 0; i < 360; i += 1) {
-      let vx = map(i, 0, 360, 0, PI)
-      let x = map(cos(i), -1, 1, this.a, this.b) + (this.vx * 5 * cos(vx))
-      let y = map(sin(i), -1, 1, this.a, this.b) // + (this.vx * sin(vx))
-      point(x, y);
-    }
-    pop()
+    // rotate(this.angle)
+    beginShape()
+    let n_points = 360
+    let lastPoint;
+    for (let i = 0; i <= n_points; i += 1) {
+      let angle = map(i, 0, n_points, 0, TWO_PI)
+      let x = map(cos(angle), -1, 1, this.a, this.b)
+      let y = map(sin(angle), -1, 1, this.a, this.b)
 
+      push()
+      translate(x, y)
+      rotate(angle)
+
+      let xx = map(i, 0, n_points, -PI / 2, (-PI / 2) + TAU)
+      let newX = 8 * sin(this.c * xx) * sin(this.c * xx)
+      let newY = 8 * cos(this.c * xx) * cos(this.c * xx)
+
+      // curveVertex(x + newX, y + newY)
+      point(newX, newY)
+
+      // if (i == 0) {
+      //   lastPoint = [newX, newY]
+      // }
+      pop()
+    }
+    // curveVertex(lastPoint[0], lastPoint[1])
+    // endShape(CLOSE)
+    pop()
   }
 }
-
-
-// let dist = Math.hypot(p1[0] - p2[0], p1[1] - p2[1])
-// for (let i = 0; i <=dist; i++) {
-//   let xx = map(0, dist, p1[0], p2[0])
-//   let yy = map(0, dist, p1[1], p2[1])
-
-// }
 
 
 function drawGrid(seed, weight, alpha, c, randomStroke) {
