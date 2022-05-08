@@ -10,73 +10,59 @@
 precision highp float;
 #endif
 
-uniform float mouse;
 varying vec2 vTexCoord;
-uniform vec2 uDims;
-uniform vec2 uBalls[10];
-uniform float uRadii[10];
 
-void main() {
-    // A blue color
-    // In shaders, the RGB color spectrum goes from 0 - 1 instead of 0 - 255
-    vec2 coord = vTexCoord;
-    // scale x and y to true pixel positions
-    float pixelX = vTexCoord.x * 1280.;//* uDims.x;
-    float pixelY = vTexCoord.y * 1280.; //* uDims.y;
+uniform float u_frameCount;
+uniform vec3 u_metaballs[20];
 
-    vec2 pixelPos = vec2(vTexCoord.x * uDims.x, vTexCoord.y * uDims.y);
+const float WIDTH = 1280.;
+const float HEIGHT = 1280.;
 
-    // if it's not within radius of a ball, it's black
-    // get the closest ball
-    bool inBall = false;
-    float distSum = 0.0;
-    /* float maxDist = sqrt(uDims.x * uDims.x + uDims.y * uDims.y); */
-    for (int i = 0; i < 20; i++) {
-      vec2 ball = uBalls[i];
-      float radius = uRadii[i];
-      /* float dx = abs(pixelX - ball.x); */
-      /* float dy = abs(pixelY - ball.y); */
-      float thisDist = distance(vTexCoord, ball);
-      /* float pixelDistFromRadius = sqrt(dx * dx + dy * dy); */
-      /* dists = dists + pixelDistFromRadius; */
-      /* float thisDist = sqrt(dx * dx  + dy * dy); */
-      /* if (thisDist > distSum) */
-      /*   dists = thisDist; */
-      if (thisDist <= radius) 
-        inBall = true;
-
-      // above 1 if frag is within radius of a ball.
-      float dd = radius / thisDist;
-      // so will be `radius` if we are exactly radius away.
-      // greater than radius if closer, and far less than radius if farther.
-      distSum += radius * dd;
-    }
-      /* dists += dists * dists / (dx * dx + dy * dy); */
-      /* if (pixelDistFromRadius < radius) { */
-      /*   inBall = true; */
-      /* } */
-  /*   if (dists > 1.0)  */
-  /*     gl_FragColor = vec4(vTexCoord.x, vTexCoord.y, 0.0, 1.0); */
-		/* else  */
-  /*     gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); */
-
-    gl_FragColor = vec4(0., 0., distSum, 1.);
-    /* if (distSum >= 2000.)  */
-    /*   gl_FragColor = vec4(0., 0., 255., 1.);  */
-    /* else */
-    /*   gl_FragColor = vec4(255., 0., distSum, 1.); */
-
-    /* if (distSum > 230. && distSum < 255.)  */
-    /*   gl_FragColor = vec4(255., 0., (distSum - 230.)/255., 1.); */
-
-    /* if (inBall) { */
-    /*   gl_FragColor = vec4(vTexCoord.x, vTexCoord.y, 0., 1.); */
-    /* } else { */
-    /*   gl_FragColor = vec4(vTexCoord.x,0.,0.,1.); */
-    /* } */
-
-
-    // gl_FragColor is a built in shader variable, and you .frag file must contain it
-    // We are setting the vec3 color into a new vec4, with an transparency of 1 (no opacity)
+// shamelessly taken from https://thebookofshaders.com/11/
+float random (in vec2 st) {
+    return fract(sin(dot(st.xy,
+                         vec2(12.9898,78.233)))
+                 * 43758.5453123);
 }
 
+float noise (in vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+
+    // Four corners in 2D of a tile
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+
+    // Smooth Interpolation
+
+    // Cubic Hermine Curve.  Same as SmoothStep()
+    vec2 u = f*f*(3.0-2.0*f);
+    // u = smoothstep(0.,1.,f);
+
+    // Mix 4 coorners percentages
+    return mix(a, b, u.x) +
+            (c - a)* u.y * (1.0 - u.x) +
+            (d - b) * u.x * u.y;
+}
+
+void main() {
+  bool inBall = false;
+  float v = 0.0;
+
+  for (int i = 1; i < 20; i++) {
+    vec2 ballPos = u_metaballs[i].xy;
+    float r = u_metaballs[i].z;
+    v += (r*r) / distance(vTexCoord, ballPos);
+  }
+
+  // change this for various effects
+  if (v >= 1.)  {
+    vec3 blobColor = vec3(255, vTexCoord.xy);
+    gl_FragColor = vec4(blobColor * noise(vTexCoord * 5.), 0.3);
+  }
+  else {
+    gl_FragColor = vec4(vTexCoord.y, 255, vTexCoord.x, 0.3);
+  }
+}

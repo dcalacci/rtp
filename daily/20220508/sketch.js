@@ -12,9 +12,6 @@ let shaderGraphics;
 let metaballs = [];
 let N_BALLS = 20
 
-let outsideRadius = 200;
-let insideRadius = 100;
-
 function mousePressed() {
   save(new Date().toJSON() + ".png")
 }
@@ -30,6 +27,7 @@ function setup() {
   noStroke()
 
   shaderGraphics = createGraphics(WIDTH, HEIGHT, WEBGL);
+  shaderGraphics.shader(theShader)
   shaderGraphics.noStroke();
 
   for (let i = 0; i < N_BALLS; i++)
@@ -40,38 +38,44 @@ function setup() {
 function draw() {
   background(bgCol)
 
-  theShader.setUniform('mouse', map(mouseX, 0, WIDTH, 0, 1));
-  theShader.setUniform('uDims', [WIDTH, HEIGHT])
-  // change to just pos if not working...
-  theShader.setUniform('uBalls', metaballs.map((b) => [b.pos.x, b.pos.y]))
-  theShader.setUniform('uRadii', metaballs.map((b) => b.radius))
+  metaballs.forEach((b) => b.update())
+  theShader.setUniform(
+    'u_metaballs',
+    metaballs.map((b, i) => [b.pos.x, b.pos.y, b.radius]).flat())
 
-  shaderGraphics.shader(theShader)
+  theShader.setUniform('u_frameCount', frameCount)
+  theShader.setUniform('uResolution', [WIDTH, HEIGHT])
+
+  // translate(-WIDTH / 2, -HEIGHT / 2)
+  imageMode(CENTER)
+
+  push()
+  translate(WIDTH / 2, HEIGHT / 2)
   shaderGraphics.rect(0, 0, WIDTH, HEIGHT);
+  // translate(WIDTH / 2, HEIGHT / 2)
+  // rotate(frameCount / 150)
   image(shaderGraphics, 0, 0, WIDTH, HEIGHT)
-
-  for (const ball of metaballs) {
-    ball.update();
-    fill('#2e2e2e')
-    circle(ball.pos.x, ball.pos.y, ball.radius)
-  }
+  pop()
 }
 
+const minSize = 0.1;
+const maxSize = 0.175;
 class Metaball {
   constructor() {
-    const size = Math.pow(Math.random(), 2);
-    this.vel = p5.Vector.random2D().mult(5 * (1 - size) + 2);
-    this.radius = 100 * size + 20;
+    const size = map(Math.pow(Math.random(), 2), 0, 1, minSize, maxSize);
+    // trying to solve for tiny velos
+    this.vel = p5.Vector.random2D().mult(map(size, minSize, maxSize, 0.001, 0.002))
+    this.radius = size;
 
     this.pos = new p5.Vector(
-      random(this.radius, width - this.radius),
-      random(this.radius, height - this.radius));
+      random(this.radius, 1 - this.radius),
+      random(this.radius, 1 - this.radius));
   }
 
   update() {
     this.pos.add(this.vel);
 
-    if (this.pos.x < this.radius || this.pos.x > width - this.radius) this.vel.x *= -1;
-    if (this.pos.y < this.radius || this.pos.y > height - this.radius) this.vel.y *= -1;
+    if (this.pos.x < this.radius / 2 || this.pos.x > 1 - this.radius / 2) this.vel.x *= -1;
+    if (this.pos.y < this.radius / 2 || this.pos.y > 1 - this.radius / 2) this.vel.y *= -1;
   }
 }
