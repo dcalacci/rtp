@@ -13,6 +13,7 @@ let moveList = [latestMove]
 
 
 function setup() {
+  frameRate(30)
   pixelDensity(1);
   createCanvas(8.5 * 150, 11 * 150); // create an 8.5x11 inch canvas at 150dpi
   for (let x = 0; x < width; x += spacer) {
@@ -22,7 +23,6 @@ function setup() {
     }
   }
   grid[spacer][spacer] = 1;
-  // noLoop();
   rectMode(CENTER);
 }
 
@@ -31,40 +31,46 @@ function canMove(x, y) {
   // from another dot, return true
   surroundingsAreEmpty = (x, y) => {
     // returns true if only one surrounding dot is filled
+    let newGrid = grid;
+    // let latestMove = moveList[moveList.length - 1];
     let surroundings = [
-      grid[x + spacer][y],
-      grid[x - spacer][y],
-      grid[x][y + spacer],
-      grid[x][y - spacer],
-      grid[x+spacer][y+spacer],
-      grid[x-spacer][y-spacer]
+      newGrid[x][y],
+      newGrid[x + spacer][y],
+      newGrid[x - spacer][y],
+      newGrid[x][y + spacer],
+      newGrid[x][y - spacer],
+      // newGrid[x + spacer][y + spacer],
+      // newGrid[x - spacer][y - spacer]
     ];
-    return surroundings.filter((s) => s === 1).length <= 2;
+    console.log(x, y, "surround:", surroundings)
+    return surroundings.filter((s) => s === 1).length <= 1;
   };
-
-  return (
-    x >= spacer && x < width-spacer && y >= spacer && y < height-spacer && surroundingsAreEmpty(x, y)
-  );
+  let inBounds = x >= spacer && x < width - spacer && y >= spacer && y < height - spacer;
+  if (inBounds) {
+    let isValid = surroundingsAreEmpty(x, y)
+    return isValid
+  }
+  return false
 }
 
-function makeMove(x,y, direction) {
-    let newX = x;
-    let newY = y;
-    switch (direction) {
-      case 0:
-        newX += spacer;
-        break;
-      case 1:
-        newX-= spacer;
-        break;
-      case 2:
-        newY+= spacer;
-        break;
-      case 3:
-        newY-= spacer;
-        break;
-    }
-    return [newX, newY]
+function makeMove(x, y, direction) {
+  let newX = x;
+  let newY = y;
+  switch (direction) {
+    case 0: //right
+      newX += spacer;
+      break;
+    case 1: //left
+      newX -= spacer;
+      break;
+    case 2: // down 
+      newY += spacer;
+      break;
+    case 3: // up
+      newY -= spacer;
+      break;
+  }
+  return [newX, newY]
 }
 
 function generateMove(x, y) {
@@ -76,35 +82,58 @@ function generateMove(x, y) {
   if (legalMoves.length == 0) {
     return false
   }
+  console.log(x, y, legalMoves)
   return random(legalMoves)
 }
 
+let bgCol = "#f9f9f9"
 
+let backup = 2
 function draw() {
   // Loop through creating line segments
   // TODO: segments should be at least two long
+  background(bgCol)
   beginShape();
   fill(230, 0, 76);
   noStroke();
-  for (let x = 0; x < width; x += spacer) {
-    for (let y = 0; y < height; y += spacer) {
-      if (grid[x][y] === 1) {
-        rect(x, y, spacer - 1, spacer - 1);
+  // for (let x = 0; x < width; x += spacer) {
+  //   for (let y = 0; y < height; y += spacer) {
+  //     if (grid[x][y] === 1) {
+  //       rect(x, y, spacer, spacer);
+  //     }
+  //   }
+  // }
+  moveList.forEach((m) => {
+    rect(m[0], m[1], spacer, spacer)
+  })
+
+
+}
+
+function keyPressed() {
+  if (key == "ArrowRight") {
+    let latestMove = moveList[moveList.length - 1];
+    let nextMove = generateMove(latestMove[0], latestMove[1]);
+    if (nextMove === false) {
+      // let poppedMove = moveList.pop();
+      console.log("Backing up...")
+      for (let i = 0; i <= backup; i++) {
+        backMove = moveList.slice(moveList.length - i, moveList.length)
+        grid[backMove[0], backMove[1]] = 0
       }
+
+      console.log("deleting two moves...")
+      moveList = moveList.slice(0, moveList.length - backup);
+    } else {
+      let [newX, newY] = makeMove(latestMove[0], latestMove[1], nextMove);
+      moveList.push([newX, newY])
+      grid[newX][newY] = 1;
+      console.log("making move", nextMove, newX, newY)
     }
   }
-  let latestMove = moveList[moveList.length - 1];
-  let move = generateMove(latestMove[0], latestMove[1]);
-  if (move === false) {
-    console.log("can't move, retracing...")
-    // let poppedMove = moveList.pop();
-    console.log(moveList.length)
-    moveList = moveList.slice(0, moveList.length - 2);
-    console.log(moveList.length)
-  } else {
-    let [newX, newY] = makeMove(latestMove[0], latestMove[1], move);
-    grid[newX][newY] = 1;
-    moveList.push([newX, newY])
-
+  else if (key == "ArrowLeft") {
+    console.log("backing up...")
+    backMove = moveList.slice(moveList.length - 1, moveList.length)
+    grid[backMove[0], backMove[1]] = 0
   }
 }
