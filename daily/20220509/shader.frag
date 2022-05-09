@@ -10,7 +10,7 @@
 precision highp float;
 #endif
 
-varying vec2 vTexCoord;
+varying vec3 vTexCoord;
 
 uniform float u_frameCount;
 uniform vec4 u_metaballs[20];
@@ -54,13 +54,13 @@ void main() {
   for (int i = 1; i < 20; i++) {
     vec2 ballPos = u_metaballs[i].xy;
     float r = u_metaballs[i].w;
-    v += (r*r) / distance(vTexCoord, ballPos);
+    v += (r*r) / distance(vTexCoord.xy, ballPos);
   }
 
   // change this for various effects
   if (v >= 1.)  {
     vec3 blobColor = vec3(255, vTexCoord.xy);
-    gl_FragColor = vec4(blobColor * noise(vTexCoord * 5.), 0.3);
+    gl_FragColor = vec4(blobColor * noise(vTexCoord.xy * 5.), 0.3);
   }
   else {
     gl_FragColor = vec4(vTexCoord.y, 255, vTexCoord.x, 0.3);

@@ -13,8 +13,8 @@ precision mediump float;
 // It automatically gets the position of every vertex on your canvas
 
 attribute vec3 aPosition;
-attribute vec2 aTexCoord;
-varying vec2 vTexCoord;
+attribute vec3 aTexCoord;
+varying vec3 vTexCoord;
 
 // We always must do at least one thing in the vertex shader:
 // tell the pixel where on the screen it lives:

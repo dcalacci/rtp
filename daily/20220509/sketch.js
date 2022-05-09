@@ -42,7 +42,6 @@ function draw() {
   theShader.setUniform(
     'u_metaballs',
     metaballs.map((b, i) => [b.pos.x, b.pos.y, b.pos.z, b.radius]).flat())
-  // console.log(metaballs.map((b, i) => [b.pos.x, b.pos.y, b.pos.z, b.radius]).flat())
 
   theShader.setUniform('u_frameCount', frameCount)
   theShader.setUniform('uResolution', [WIDTH, HEIGHT])
