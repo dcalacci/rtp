@@ -69,8 +69,8 @@ function draw() {
   // pop()
 }
 
-const minSize = 0.09;
-const maxSize = 0.175;
+const minSize = 0.05;
+const maxSize = 0.2;
 class Metaball {
   constructor() {
     const size = map(Math.pow(Math.random(), 2), 0, 1, minSize, maxSize);
@@ -82,6 +82,12 @@ class Metaball {
       random(this.radius, 1 - this.radius),
       random(this.radius, 1 - this.radius),
       random(this.radius, 1 - this.radius));
+
+    // this.pos = new p5.Vector(
+    //   random(0.1, 0.9),
+    //   random(0.1, 0.9),
+    //   random(0.1, 0.9));
+
   }
 
   update() {
