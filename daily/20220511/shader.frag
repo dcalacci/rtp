@@ -79,9 +79,9 @@ float noise2(vec2 st) {
 ///////////////////////////////////////////////////////
 
 // minimum distance from any ball
-float min_distance_from_blob(in vec3 p) {
+float min_distance_from_blob_1(in vec3 p) {
   float min_distance = 1.;
-  int blob_index = 0;
+  /* int blob_index = 0; */
   for (int i = 1; i < 20; ++i) {
     float r = u_metaballs[i].w;
     vec3 ballPos = u_metaballs[i].xyz;
@@ -91,14 +91,14 @@ float min_distance_from_blob(in vec3 p) {
     float dist = length(p - ballPos) - r;
     if (dist < min_distance) {
       min_distance = dist;
-      blob_index = i;
+      /* blob_index = i; */
     }
   }
   return min_distance;
 }
 
 // min distance from the "blob"
-float min_distance_from_total_blob(in vec3 p) {
+float min_distance_from_blob(in vec3 p) {
   float min_distance = 1.;
   int blob_index = 0;
 
@@ -107,20 +107,20 @@ float min_distance_from_total_blob(in vec3 p) {
     vec3 ballPos = u_metaballs[i].xyz;
     float r = u_metaballs[i].w;
     v += (r*r) / distance(p, ballPos);
-  }
-
-  for (int i = 1; i < 20; ++i) {
-    float r = u_metaballs[i].w;
-    vec3 ballPos = u_metaballs[i].xyz;
-
-    // subtract r to get to edge of circle, not just center
     float dist = length(p - ballPos) - r;
     if (dist < min_distance) {
       min_distance = dist;
       blob_index = i;
     }
   }
-  return min_distance;
+
+  if (v >= 0.55) {
+    return v * 0.00001;
+    /* return 0.0001; */
+  } else {
+    return 0.1;
+    /* return min_distance; */
+  }
   /* return length(p - u_metaballs[2].xyz) - u_metaballs[2].w; */
   /* return length(p - vec3(0.0)) - 1.; */
     /* v += (r*r) / distance(vTexCoord, ballPos); */
@@ -185,7 +185,7 @@ vec4 ray_march(in vec3 ro, in vec3 rd)
             // We hit something! Return red for now
             /* return vec3(1.0, 0.0, 0.0); */
             vec3 normal = calculate_normal(current_position);
-            vec3 light_position = vec3(2.0, -5.0, 3.0);
+            vec3 light_position = vec3(5.0, 5.0, 3.0);
             vec3 direction_to_light = normalize(current_position - light_position);
 
             float diffuse_intensity = max(0.0, dot(normal, direction_to_light));
@@ -228,9 +228,7 @@ void main() {
 
   vec3 camera_position = vec3(0.0, 0.0, -1.5);
   vec3 ro = camera_position;
-  vec3 rd = vec3(uv, 1.0);
-
-  float v = 0.0;
+  vec3 rd = vec3(uv, 1.3);
 
   vec4 shaded_color = ray_march(ro, rd);
   /* vec4 o_color = vec4(shaded_color, 1.0); */
