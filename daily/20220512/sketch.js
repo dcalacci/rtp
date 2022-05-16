@@ -24,12 +24,14 @@ function preload() {
 function setup() {
   pixelDensity(1);
 
-  createCanvas(WIDTH, HEIGHT);
-  noStroke()
+  // createCanvas(WIDTH, HEIGHT);
+  // noStroke()
   frameRate(30)
-  shaderGraphics = createGraphics(WIDTH, HEIGHT, WEBGL)
-  shaderGraphics.shader(theShader)
-  shaderGraphics.noStroke();
+  createGraphics(WIDTH, HEIGHT, WEBGL)
+  createCanvas(WIDTH, HEIGHT, WEBGL)
+  ortho(-WIDTH, WIDTH, HEIGHT, -HEIGHT / 2, 0.1, 100);
+  shader(theShader)
+  noStroke();
 
   for (let i = 0; i < N_BALLS; i++)
     metaballs.push(new Metaball());
@@ -37,7 +39,7 @@ function setup() {
 
 
 function draw() {
-  // background(bgCol)
+  background(bgCol)
 
   metaballs.forEach((b) => b.update())
   theShader.setUniform(
@@ -45,23 +47,30 @@ function draw() {
     metaballs.map((b, i) => [b.pos.x, b.pos.y, b.pos.z, b.radius]).flat())
 
   theShader.setUniform('u_frameCount', frameCount)
-  theShader.setUniform('uResolution', [WIDTH, HEIGHT])
+  theShader.setUniform('uResolution', [float(WIDTH), float(HEIGHT)])
 
-  shaderGraphics.orbitControl(4, 2, 0.1);
-  imageMode(CENTER)
+  // orbitControl(4, 2, 0.1);
+  // imageMode(CENTER)
 
-  push()
-  translate(WIDTH / 2, HEIGHT / 2)
-  shaderGraphics.rect(0, 0, WIDTH, HEIGHT);
-  shaderGraphics.rect(0, 0, WIDTH, HEIGHT);
+  // translate((WIDTH / 2) + 20, 10)
+  // push()
+  //////////////////
+  // shaderGraphics.box(100);
+  // shaderGraphics.translate(100, 100, -100);
+  // shaderGraphics.rotate(PI / 4, [1, 1, 0]);
+  // shaderGraphics.box(30);
+  /////////////////////////
+
+  rect(0, 0, WIDTH, HEIGHT);
+  // shaderGraphics.rect(0, 0, WIDTH, HEIGHT);
   // translate(WIDTH / 2, HEIGHT / 2)
   // rotate(frameCount / 150)
-  image(shaderGraphics, 0, 0, WIDTH, HEIGHT)
-  pop()
+  // image(shaderGraphics, 0, 0, WIDTH, HEIGHT)
+  // pop()
 }
 
-const minSize = 0.09;
-const maxSize = 0.175;
+const minSize = 0.05;
+const maxSize = 0.2;
 class Metaball {
   constructor() {
     const size = map(Math.pow(Math.random(), 2), 0, 1, minSize, maxSize);
@@ -73,6 +82,12 @@ class Metaball {
       random(this.radius, 1 - this.radius),
       random(this.radius, 1 - this.radius),
       random(this.radius, 1 - this.radius));
+
+    // this.pos = new p5.Vector(
+    //   random(0.1, 0.9),
+    //   random(0.1, 0.9),
+    //   random(0.1, 0.9));
+
   }
 
   update() {
