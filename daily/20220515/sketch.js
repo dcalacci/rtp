@@ -1,10 +1,10 @@
 let WIDTH = 1280;
 let HEIGHT = 1280;
-let FRAME_RATE = 30
+let FRAME_RATE = 100 
 let bgCol = "#f9f9f9";
 
 let STEP_SIZE = 10;
-let velocity = 300; // pixels / sec
+let velocity = 500; // pixels / sec
 
 let city_limit;
 let padding = 50;

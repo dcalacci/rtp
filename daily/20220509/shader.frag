@@ -9,6 +9,8 @@
 #ifdef GL_ES
 precision highp float;
 #endif
+#extension GL_OES_standard_derivatives : enable
+
 
 varying vec3 vTexCoord;
 
@@ -52,17 +54,20 @@ void main() {
   float v = 0.0;
 
   for (int i = 1; i < 20; i++) {
-    vec2 ballPos = u_metaballs[i].xy;
+    vec3 ballPos = u_metaballs[i].xyz;
     float r = u_metaballs[i].w;
-    v += (r*r) / distance(vTexCoord.xy, ballPos);
+    v += (r*r) / distance(vTexCoord, ballPos);
   }
 
   // change this for various effects
-  if (v >= 1.)  {
+  if (v >= 0.5)  {
     vec3 blobColor = vec3(255, vTexCoord.xy);
-    gl_FragColor = vec4(blobColor * noise(vTexCoord.xy * 5.), 0.3);
+    gl_FragColor = vec4(blobColor * noise(vTexCoord.xy * 8. * sin(u_frameCount/100.)), 0.7);
   }
   else {
-    gl_FragColor = vec4(vTexCoord.y, 255, vTexCoord.x, 0.3);
+
+    /* vec3 blobColor = vec3(255, vTexCoord.xy); */
+    /* gl_FragColor = vec4(blobColor * noise(vTexCoord.xy * 3.), 0.7); */
+    gl_FragColor = vec4(vTexCoord.y, 200. + noise(vec2(u_frameCount, vTexCoord.z))*55., vTexCoord.x, 0.1);
   }
 }
