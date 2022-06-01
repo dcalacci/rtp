@@ -59,7 +59,7 @@ function draw() {
           width + frameCount / 30) / 2 + 0.1);
 
         box(
-          (side - spacing / 2) * hh * 2, //* map(getH(x + side / 2, y + side / 2, z), 0, 1, 1, 1.2),
+          (side - spacing / 2),// * hh * 2, //* map(getH(x + side / 2, y + side / 2, z), 0, 1, 1, 1.2),
           (side - spacing / 2) * map(hh, 0, 1, .5, 1.2),
           (side - spacing / 2));
         pop();
