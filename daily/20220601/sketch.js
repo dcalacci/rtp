@@ -28,11 +28,11 @@ function setup() {
   ortho(-width / 2, width / 2, -height / 2, height / 2, -5 * size, 10 * size);
   camera(width, -width / 2, width * 2, 0, 0, 0, 0, 1, 0);
   //noLoop();
-  dims = ["x", "y", "z"]
+  dims = [0, 1, 2]
   dims.forEach((d, i) => frames[d] = _.fill(Array(divs), 0))
   dims.forEach((d) => lastMax[d] = _.fill(Array(divs), 0))
   // staggering pauses means each dim moves in isolation
-  dims.forEach((d, i) => pauses[d] = 1 + i * 5)
+  dims.forEach((d, i) => pauses[d] = i * 2)
 }
 
 function getLight() {
@@ -57,10 +57,11 @@ function draw() {
       for (let x = 0; x < divs; x++) {
         push();
         getTranslation(x, y, z, frameCount)
+        let tt = getTransform(x, y, z, frameCount)
         box(
-          (boxWidth - spacing / 2),// * hh * 2, //* map(getH(x + side / 2, y + side / 2, z), 0, 1, 1, 1.2),
-          (boxWidth - spacing / 2),
-          (boxWidth - spacing / 2));
+          (boxWidth - spacing / 2) * tt[0], //* map(getH(x + side / 2, y + side / 2, z), 0, 1, 1, 1.2),
+          (boxWidth - spacing / 2) * tt[1],
+          (boxWidth - spacing / 2) * tt[2]);
         pop();
       }
     }
@@ -86,9 +87,9 @@ function getDimTranslation(dimName, dimIndex, t) {
 function getTranslation(x, y, z, t, h) {
   let vertOffset = boxWidth - spacing;
   translate(
-    getDimTranslation('x', x, t) + vertOffset,
-    getDimTranslation('y', y, t) + vertOffset,
-    getDimTranslation('z', z, t) + vertOffset,
+    getDimTranslation(0, x, t) + vertOffset,
+    getDimTranslation(1, y, t) + vertOffset,
+    getDimTranslation(2, z, t) + vertOffset,
     // map(x, 0, divs, -size / 2, size / 2) + vertOffset,
     // map(y, 0, divs, -size / 2, size / 2) + vertOffset,
     // map(z, 0, divs, -size / 2, size / 2) + vertOffset
@@ -96,22 +97,19 @@ function getTranslation(x, y, z, t, h) {
 }
 
 
-
-
-function getH(x, y, z) {
+function getTransform(x, y, z, t) {
   let distFromCenter = dist(0, 0, 0, x, y, z);
-  let d;
-  d = z;
-  // } else if (frameCount < 20 * 30) {
-  //   d = z;
-  // } else if (frameCount < 30 * 30) {
-  //   d = distFromCenter
-  // }
-  return (
-    cos(
-      (frequency * PI / 2 * d) /
-      width + frameCount / 30) / 2 +
-    0.1
-  );
-}
+  let vertOffset = boxWidth - spacing;
 
+  return [x, y, z].map((d, i) => {
+    let pos = map(d, 0, divs, -size / 2, size / 2)
+    let dimOffset = map(sin(distFromCenter + frames[i][d] / 30), -1, 1, 0.5, 1.2)
+    return dimOffset
+  })
+  // return (
+  //   cos(
+  //     (PI / 2 * distFromCenter) /
+  //     width + frameCount / 30) / 2 +
+  //   0.1
+  // );
+}
