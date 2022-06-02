@@ -1,4 +1,4 @@
-let divs = 4;
+let divs = 5;
 let size = 250;
 let minHeight = 20;
 let maxHeight = 120;
@@ -19,8 +19,8 @@ function setup() {
   } else {
     noStroke();
   }
-  ortho(-width / 2, width / 2, -height / 2, height / 2, -2 * size, 6 * size);
-  camera(width, -width / 2, width, 0, 0, 0, 0, 1, 0);
+  ortho(-width / 2, width / 2, -height / 2, height / 2, -5 * size, 10 * size);
+  camera(width, -width / 2, width * 2, 0, 0, 0, 0, 1, 0);
   //noLoop();
 }
 
@@ -55,7 +55,7 @@ function draw() {
         //   ((z * (side + vertOffset)) - 100) + h / 2,
         //   (-spacing + y + side / z)); //* (sin(frameCount / 50)))
         let hh = (cos(
-          (frequency * TAU * z) /
+          (frequency * TAU * (4 * z) + (2 * x)) /
           width + frameCount / 30) / 2 + 0.1);
 
         box(
@@ -70,8 +70,8 @@ function draw() {
 function getTranslation(x, y, z, t, h) {
   let vertOffset = side - spacing;
   translate(
-    x + side,
-    y + side + h,
+    x + side + h,
+    y + side + h + (.5 * x * sin(frameCount / 30)),
     z - 400,
   )
   // (-spacing + y + side / z));
