@@ -10,6 +10,9 @@ let boxWidth; // width of each box
 
 let maxPauseLength = 5
 let pauses = {}
+let lastMax = {}
+let frames = {}
+
 
 function setup() {
   colorMode(HSB, 100);
@@ -25,8 +28,10 @@ function setup() {
   ortho(-width / 2, width / 2, -height / 2, height / 2, -5 * size, 10 * size);
   camera(width, -width / 2, width * 2, 0, 0, 0, 0, 1, 0);
   //noLoop();
-
-  pauses = { x: random(maxPauseLength) }
+  dims = ["x", "y", "z"]
+  dims.forEach((d) => frames[d] = _.fill(Array(divs), 0))
+  dims.forEach((d) => lastMax[d] = _.fill(Array(divs), 0))
+  dims.forEach((d) => pauses[d] = random(maxPauseLength))
 }
 
 function getLight() {
@@ -76,27 +81,24 @@ function draw() {
 }
 
 
-let lastMax = {}
-let xFrame = []
-
-for (let i = 0; i < divs; i++) {
-  lastMax[i] = 0;
-  xFrame[i] = 0;
-}
+// for (let i = 0; i < divs; i++) {
+//   lastMax[i] = 0;
+//   xFrame[i] = 0;
+// }
 
 function getTranslation(x, y, z, t, h) {
   let xPos = map(x, 0, divs, -size / 2, size / 2)
   let vertOffset = boxWidth - spacing;
   let offset = (d) => map(d, -size / 2, size / 2, -1, 1)
 
-  let xOffset = map(sin(xFrame[x] / 30 + offset(xPos)), -1, 1, 0, spacing)
+  let xOffset = map(sin(frames.x[x] / 30 + offset(xPos)), -1, 1, 0, spacing)
 
-  if (t - lastMax[x] < pauses.x) {
+  if (t - lastMax.x[x] < pauses.x) {
     // console.log("inside last max range for", x, lastMax[x], t)
   } else {
-    xFrame[x] += 1 / (divs * divs)
+    frames.x[x] += 1 / (divs * divs)
     if (abs(xOffset - spacing) < 0.01 || xOffset < 0.01) {
-      lastMax[x] = t
+      lastMax.x[x] = t
     }
   }
 
