@@ -29,9 +29,10 @@ function setup() {
   camera(width, -width / 2, width * 2, 0, 0, 0, 0, 1, 0);
   //noLoop();
   dims = ["x", "y", "z"]
-  dims.forEach((d) => frames[d] = _.fill(Array(divs), 0))
+  dims.forEach((d, i) => frames[d] = _.fill(Array(divs), 0))
   dims.forEach((d) => lastMax[d] = _.fill(Array(divs), 0))
-  dims.forEach((d) => pauses[d] = random(maxPauseLength))
+  // staggering pauses means each dim moves in isolation
+  dims.forEach((d, i) => pauses[d] = 1 + i * 5)
 }
 
 function getLight() {
@@ -54,22 +55,8 @@ function draw() {
   for (let z = 0; z < divs; z++) {
     for (let y = 0; y < divs; y++) {
       for (let x = 0; x < divs; x++) {
-        let yPos = map(y, 0, divs, -size / 2, size / 2)
-        let xPos = map(x, 0, divs, -size / 2, size / 2)
-        let zPos = map(z, 0, divs, -size / 2, size / 2)
-
-        let h = map(getH(
-          xPos + boxWidth / 2,
-          yPos + boxWidth / 2,
-          zPos + boxWidth / 2), 0, 1, minHeight, maxHeight);
         push();
-
-        getTranslation(x, yPos, zPos, frameCount, h)
-
-        let hh = (cos(
-          (frequency * TAU * (4 * z) + (2 * x)) /
-          width + frameCount / 30) / 2 + 0.1);
-
+        getTranslation(x, y, z, frameCount)
         box(
           (boxWidth - spacing / 2),// * hh * 2, //* map(getH(x + side / 2, y + side / 2, z), 0, 1, 1, 1.2),
           (boxWidth - spacing / 2),
@@ -80,33 +67,31 @@ function draw() {
   }
 }
 
-
-// for (let i = 0; i < divs; i++) {
-//   lastMax[i] = 0;
-//   xFrame[i] = 0;
-// }
-
-function getTranslation(x, y, z, t, h) {
-  let xPos = map(x, 0, divs, -size / 2, size / 2)
+function getDimTranslation(dimName, dimIndex, t) {
+  let pos = map(dimIndex, 0, divs, -size / 2, size / 2)
   let vertOffset = boxWidth - spacing;
   let offset = (d) => map(d, -size / 2, size / 2, -1, 1)
 
-  let xOffset = map(sin(frames.x[x] / 30 + offset(xPos)), -1, 1, 0, spacing)
+  let dimOffset = map(sin(frames[dimName][dimIndex] / 30 + offset(pos)), -1, 1, 0, spacing)
 
-  if (t - lastMax.x[x] < pauses.x) {
-    // console.log("inside last max range for", x, lastMax[x], t)
-  } else {
-    frames.x[x] += 1 / (divs * divs)
-    if (abs(xOffset - spacing) < 0.01 || xOffset < 0.01) {
-      lastMax.x[x] = t
+  if (t - lastMax[dimName][dimIndex] > pauses[dimName]) {
+    frames[dimName][dimIndex] += 1 / (divs * divs)
+    if (abs(dimOffset - spacing) < 0.01 || dimOffset < 0.01) {
+      lastMax[dimName][dimIndex] = t
     }
   }
+  return pos + vertOffset + dimOffset
+}
 
-
+function getTranslation(x, y, z, t, h) {
+  let vertOffset = boxWidth - spacing;
   translate(
-    xPos + vertOffset + xOffset,
-    y + vertOffset, //+ map(sin((t - 30) / 30 + offset(y)), 0, 1, 0, spacing),
-    z + vertOffset,
+    getDimTranslation('x', x, t) + vertOffset,
+    getDimTranslation('y', y, t) + vertOffset,
+    getDimTranslation('z', z, t) + vertOffset,
+    // map(x, 0, divs, -size / 2, size / 2) + vertOffset,
+    // map(y, 0, divs, -size / 2, size / 2) + vertOffset,
+    // map(z, 0, divs, -size / 2, size / 2) + vertOffset
   )
 }
 
