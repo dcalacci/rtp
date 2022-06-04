@@ -30,9 +30,9 @@ function setup() {
   cam = createCamera()
   ortho(-width / 2, width / 2, -height / 2, height / 2, -5 * size, 10 * size);
   cam.camera(width * 3, -width / 2, width * 2, 0, 0, 0, 0, 3, 0);
-  cam.tilt(.2)
-  cam.move(0, -600, 0)
+  cam.move(0, -700, 0)
   //noLoop();
+  cam.tilt(.25)
   dims = [0, 1, 2]
   dims.forEach((d, i) => frames[d] = _.fill(Array(divs), 0))
   dims.forEach((d) => lastMax[d] = _.fill(Array(divs), 0))
