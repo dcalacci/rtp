@@ -2,7 +2,7 @@ let WIDTH = 1280;
 let HEIGHT = 1280;
 let FRAME_RATE = 100
 
-let N_TRACKS = null // number of tracks to render
+let N_TRACKS = 20 // number of tracks to render
 let START_AT_CENTER = true// whether to start all tracks at center of canvas
 let WIDTH_OPTIONS = [1]
 let ALPHA = 0.5
