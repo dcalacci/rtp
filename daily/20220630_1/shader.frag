@@ -18,6 +18,13 @@ uniform vec3 u_metaballs[20];
 const float WIDTH = 1280.;
 const float HEIGHT = 1280.;
 
+
+float PHI = 1.61803398874989484820459;  // Φ = Golden Ratio   
+
+float gold_noise(in vec2 xy, in float seed){
+       return fract(tan(distance(xy*PHI, xy)*seed)*xy.x);
+}
+
 // shamelessly taken from https://thebookofshaders.com/11/
 float random (in vec2 st) {
     return fract(sin(dot(st.xy,
@@ -47,7 +54,17 @@ float noise (in vec2 st) {
             (d - b) * u.x * u.y;
 }
 
-float map(float value, float min1, float max1, float min2, float max2) {
+float clmp (in float val, in float mn, in float mx) {
+  if (val < mn) {
+    return mn;
+  } else if (val > mx) {
+    return mx;
+  } else {
+    return val;
+  }
+}
+
+float map (in float value, in float min1, in float max1, in float min2, in float max2) {
   return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
 }
 
@@ -56,16 +73,19 @@ float map(float value, float min1, float max1, float min2, float max2) {
 /* } */
 
 const float x_thickness = 5.;
-const float y_thickness = 5.;
+const float y_thickness = 9.;
 const float d_linex = 10.;
 const float d_liney = 10.;
+
+const int n_layers = 20;
 
 
 void main() {
   bool inBall = false;
   float v = 0.0;
 
-  for (int i = 1; i < 20; i++) {
+  // needs to be number of metaballs
+  for (int i = 1; i < 15; i++) {
     vec2 ballPos = u_metaballs[i].xy;
     float r = u_metaballs[i].z;
     v += (r*r) / distance(vTexCoord, ballPos);
@@ -76,14 +96,25 @@ void main() {
   float mody = mod(float(vTexCoord.y) * WIDTH, d_liney);
   vec3 blobColor = vec3(255, vTexCoord.xy);
   /* float n1 = noise(vTexCoord.xy/(u_frameCount/1000.)); */
-  if (v >= 1.2)  {
+  float r1 = random(vTexCoord.xy * noise(vTexCoord.xy)); /// (vTexCoord.y*2.);
+  float seed = fract(u_frameCount);
+  /* float r1 = map(gold_noise(vTexCoord.xy*1000., seed), 0., 255., 0., 1.); */
+  /* float r1 = map(noise(vTexCoord.xy * sin(u_frameCount/1000.)), -1., 1., 0., 1.); */
+  float n1 = map(noise(vTexCoord.xy * u_frameCount/100.), 0., 1., -.1, .1);
+  /* float n2 = map(noise(vTexCoord.xy * sin(u_frameCount/1000.)), 0., 1., -2., 2.); */
+  float vv = clmp(v, 0., 1.1);
+  /* float vm = map(vv, 0., 1.4, -2., 2.); */
+  float vm = map(vv, 0., 1.4, -2., 2.);
+  if (r1 <= vm) {
+  /* if (v >= 1.2 && n1 > 0.333)  { */
     if (modx < y_thickness) {
-      gl_FragColor = vec4(blobColor * noise(vTexCoord * 5.), 0.5);
+      gl_FragColor = vec4(blobColor * noise(vTexCoord * 2. + u_frameCount/1000.), 0.5);
     }
   }
   else {
-    if (mody < x_thickness) {
-      gl_FragColor = vec4(vTexCoord.y, 255, vTexCoord.x, 0.5);
-    }
+    /* if (mody < x_thickness) { */
+    /* gl_FragColor = vec4(vTexCoord.y/2., 255, vTexCoord.y/2., 0.2); */
+    gl_FragColor = vec4(255, 255, 255, 0.5);
+    /* } */
   }
 }
