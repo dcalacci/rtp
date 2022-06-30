@@ -47,12 +47,19 @@ float noise (in vec2 st) {
             (d - b) * u.x * u.y;
 }
 
+float map(float value, float min1, float max1, float min2, float max2) {
+  return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+}
+
 /* float mod (in float a, in float b) { */
 /*   return a - (b * floor(a/b)) */
 /* } */
 
+const float x_thickness = 5.;
+const float y_thickness = 5.;
 const float d_linex = 10.;
 const float d_liney = 10.;
+
 
 void main() {
   bool inBall = false;
@@ -68,13 +75,14 @@ void main() {
   float modx = mod(float(vTexCoord.x) * WIDTH, d_linex);
   float mody = mod(float(vTexCoord.y) * WIDTH, d_liney);
   vec3 blobColor = vec3(255, vTexCoord.xy);
+  /* float n1 = noise(vTexCoord.xy/(u_frameCount/1000.)); */
   if (v >= 1.2)  {
-    if (modx < 1.) {
+    if (modx < y_thickness) {
       gl_FragColor = vec4(blobColor * noise(vTexCoord * 5.), 0.5);
     }
   }
   else {
-    if (mody < 1.) {
+    if (mody < x_thickness) {
       gl_FragColor = vec4(vTexCoord.y, 255, vTexCoord.x, 0.5);
     }
   }

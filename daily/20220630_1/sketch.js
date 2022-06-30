@@ -37,6 +37,7 @@ function setup() {
 
 function draw() {
   background(bgCol)
+  // noLoop()
 
   metaballs.forEach((b) => b.update())
   theShader.setUniform(
