@@ -102,8 +102,7 @@ void main() {
   /* float r1 = map(noise(vTexCoord.xy * sin(u_frameCount/1000.)), -1., 1., 0., 1.); */
   float n1 = map(noise(vTexCoord.xy * u_frameCount/100.), 0., 1., -.1, .1);
   /* float n2 = map(noise(vTexCoord.xy * sin(u_frameCount/1000.)), 0., 1., -2., 2.); */
-  float vv = clmp(v, 0., 1.1);
-  /* float vm = map(vv, 0., 1.4, -2., 2.); */
+  float vv = clmp(v, 0., 1.2);
   float vm = map(vv, 0., 1.4, -2., 2.);
   if (r1 <= vm) {
   /* if (v >= 1.2 && n1 > 0.333)  { */

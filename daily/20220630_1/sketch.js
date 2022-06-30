@@ -76,7 +76,7 @@ class Metaball {
   update() {
     this.pos.add(this.vel);
 
-    if (this.pos.x < this.radius / 2 || this.pos.x > 1 - this.radius / 2) this.vel.x *= -1.2;
+    if (this.pos.x < this.radius / 2 || this.pos.x > 1 - this.radius / 2) this.vel.x *= -1;
     if (this.pos.y < this.radius / 2 || this.pos.y > 1 - this.radius / 2) this.vel.y *= -1;
   }
 }
