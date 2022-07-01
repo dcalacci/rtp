@@ -7,21 +7,31 @@ let bgCol = "#f9f9f9"
 // let colors = ["#FFA69E", "#9CAFB7", "#344055", "#E9EB9E", "#A30000", "#303030"]
 // palette: ["#D1C5DE", "#DEBFB6", "#A6C6C1", "#5297AB"],
 
+let palettes = [
+  ["#D1C5DE", "#DEBFB6", "#A6C6C1", "#5297AB"],
+  ["#D85F52", "#45998A", "#67839D", "#DDA606"]
+
+
+]
+
 
 const settings = {
   numLines: 5,
-  palette: ["#D85F52", "#45998A", "#67839D", "#DDA606"],
-  jitter: 4,
-  density: 0.8,
-  strokeWeight: 0.1,
+  palette: 0,
+  jitter: 1.5,
+  density: 0.5,
+  strokeWeight: 2,
   backgroundColor: "#f9f9f9",
   canvasColor: "#e4e4e4",
   alpha: 0.1
 }
 
 function keyPressed() {
-  if (key == "s")
-    save(new Date().toJSON() + ".png")
+  if (key == "s") {
+    fname = new Date().toJSON()
+    save(fname + ".png")
+    saveJSON(settings, fname + ".json")
+  }
 }
 
 function preload() {
@@ -37,6 +47,7 @@ function setup() {
   gui.useLocalStorage = true
   controllers = []
   controllers.push(gui.add(settings, "numLines", 0, 10, 1));
+  controllers.push(gui.add(settings, "palette", 0, palettes.length, 1));
   controllers.push(gui.add(settings, "jitter", 0, 10, 0.01));
   controllers.push(gui.add(settings, "alpha", 0, 1, 0.01));
   controllers.push(gui.add(settings, "density", 0, 1, 0.1));
@@ -73,7 +84,7 @@ function draw() {
 
   // Draw Here
   // let palette = _.sampleSize(settings.palette, settings.palette.length)
-  let palette = settings.palette
+  let palette = palettes[settings.palette]
   console.log("palette:", palette)
 
   _.range(settings.numLines - 1).forEach((i) => {
@@ -136,10 +147,12 @@ drawPaintedRect = ({ canvas, width, height, strokeWeight, density, jitter, color
   _.range(nLayers).forEach((i) => {
     canvas.push()
     canvas.translate(0, noise() / 4)
+    let direction = random([-1, 1])
     _.range(nLines).forEach((n) => {
       let c = getCloseColor(color)
       c.setAlpha(alpha)
       canvas.stroke(c)
+      canvas.fill(c)
       canvas.strokeWeight(d3.randomNormal(lineWeight, 2))
       if (d3.randomBernoulli(1 / 3)() > 0) {
         //TODO: stray and errant lines here really bother me.
@@ -147,9 +160,19 @@ drawPaintedRect = ({ canvas, width, height, strokeWeight, density, jitter, color
         // filter them for outliers, and then draw.
         canvas.push()
         // cheap way to "rotate" the lines on center
-        canvas.line(
-          0 - jt(), n * lineWeight + jt(),
-          w + jt(), n * lineWeight + jt())
+        let N = 100
+        _.range(N).forEach((i) => {
+          let j = direction < 0 ? N - i : i
+          // let i = N - i
+          canvas.translate(jt(), jt() * 2)
+          let d = w / N;
+          // if (noise(i * 2000, n * lineWeight * 1000 + ) > 0.2)
+          if (d3.randomBernoulli(0.9)() > 0)
+            canvas.circle(j * d, n * lineWeight * 0.9, lineWeight)
+        })
+        // canvas.line(
+        //   0 - jt(), n * lineWeight + jt(),
+        //   w + jt(), n * lineWeight + jt())
         canvas.pop()
       }
     })
