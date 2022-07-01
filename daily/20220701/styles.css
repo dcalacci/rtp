@@ -1,0 +1,29 @@
+:root {
+    --accent: pink;
+    --bg: #212121;
+    --text: #fff;
+  }
+
+body {
+  grid-template-columns: 1fr min(80rem,90%) 1fr;
+  display: grid;
+  background-color: #212121;
+  color: #fff;
+}
+
+
+main {
+    width: 100%;
+    margin:10;
+    grid-column: 2;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    /* border-radius: 12px; */
+    /* border-width: 5px; */
+    border-color: var(--accent);
+    margin: auto;
+    display: block;
+  }
