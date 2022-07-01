@@ -14,12 +14,26 @@ function preload() {
 }
 
 function setup() {
-  // blendMode(BLUR)
-  createCanvas(WIDTH, HEIGHT);
-  frameRate(FRAME_RATE)
+  randomSeed(1243);
+  colorMode(HSB);
+  rng = d3.randomLcg(random())
 
-  background(bgCol);
+  let dim = Math.min(windowWidth, windowHeight) * 0.8;
+  bg = int(random(244, 254));
+  createCanvas(0.70 * dim, dim);
+
+  rectMode(CENTER);
+
+  c = createGraphics(width * 0.9, height * 0.9)
 }
 
 function draw() {
+  noLoop()
+  background(bgCol);
+  noFill();
+
+  push()
+  c.background(240)
+  c.translate(c.width * 0.1, c.height * 0.075)
+  image(c, width * 0.05, height * 0.05)
 }
