@@ -1,0 +1,13 @@
+{
+  "numLines": 5,
+  "palette": 0,
+  "vJitter": 0.05,
+  "hJitter": 0.1,
+  "density": 0.9,
+  "strokeWeight": 1,
+  "backgroundColor": "#f9f9f9",
+  "canvasColor": "#e4e4e4",
+  "alpha": 0.9,
+  "colorVariance": 0.2,
+  "shape": 0
+}
