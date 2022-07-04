@@ -24,10 +24,11 @@ const settings = {
   shape: 0  // 0: lines; 1: dots
 }
 
+let seed = 1243
 function keyPressed() {
   if (key == "s") {
     fname = new Date().toJSON()
-    save(fname + ".png")
+    save(fname + "_" + seed + ".png")
     saveJSON(settings, fname + ".json")
   }
 }
@@ -57,13 +58,16 @@ function setup() {
   // redraw everything on slider change for noLoop sketches.
   controllers.forEach((c) => c.onChange(() => { clear(); redraw() }))
 
-  randomSeed(1243);
   colorMode(RGB);
   pixelDensity(2)
   dim = Math.min(windowWidth, windowHeight);
   rectMode(CENTER);
 
   rng = d3.randomLcg(random())
+  seed = d3.randomUniform(0, 1000)()
+
+  noiseSeed(seed)
+  randomSeed(seed);
 }
 
 
@@ -76,17 +80,13 @@ function draw() {
   noFill();
   background(settings.backgroundColor);
 
-  // randomly order our palette
-  // let palette = _.sampleSize(settings.palette, settings.palette.length)
-
   ///////////////// drawing rect
-  push()
-
   // Draw Here
   let palette = palettes[settings.palette]
   console.log("palette:", palette)
   console.log(c.width, c.height)
   //draw background
+  c.push()
   c.translate(c.width * 0.05, c.height * 0.05)
   let rectColor = _.sample(palette)
 
@@ -102,38 +102,19 @@ function draw() {
     colorVariance: settings.colorVariance,
     alpha: settings.alpha,
   })
-  pop()
+  c.pop()
 
   // draw line
-
-  // var loc = createVector(random(0, 100), random(0, 100), 2);
-  // var angle = 0; //any value to initialize
-  // var dir = createVector(cos(angle), sin(angle));
-  // var speed = random(0.5, 2);
-  // // var speed = random(5,map(mouseX,0,width,5,20));   // faster
-  // let pp = new Particle(loc, dir, speed);
-
-  // let scale = 0.01
-  // let length = random(8000, 20000)
-
-  // _.range(length).forEach(() => {
-  //   pp.run()
-  // })
-
   let path = makeParticlePath({
-    scale: 0.002,
-    strength: 10,
-    speed: 0.01,
-    length: random(8000, 15000)
+    scale: 0.005,
+    strength: 20,
+    speed: 0.09,
+    length: random(10000, 50000)
   })
 
-  console.log("particle path:", path, path[0])
-
-  c.push()
-
-  // let path = pp.path
-  // let path = makePath({ scale, length })
-  // c.translate(0.1 * width, 0.05 * height)
+  push()
+  c.fill(0)
+  translate(c.width * 0.05, c.height * 0.05)
   drawPaintedPath({
     canvas: c,
     density: 0.5,
@@ -145,19 +126,11 @@ function draw() {
     colorVariance: 0.3,
     alpha: 0.2,
     path,
-    thickness: 1,
+    thickness: 20,
     width: c.width * 0.9,
-    height: c.height
+    height: c.height * 0.9
   })
-  c.pop()
-  //OLD
-  // drawLine(c)
-  // _.range(2).forEach((n) => {
-  //   c.translate(m_rnd(), m_rnd())
-  //   c.rotate(m_rnd() / 1000)
-  //   drawLine(c)
-  //   pop()
-  // })
+  pop()
   image(c, 0, 0)
 }
 
@@ -194,6 +167,7 @@ function makeParticlePath({ scale = .01, speed = 0.1, strength = 1, length = 800
   // var speed = random(5,map(mouseX,0,width,5,20));   // faster
   let pp = new Particle(loc, dir, speed, scale, strength);
   _.range(length).forEach(() => {
+    console.log('.')
     pp.run()
   })
   return pp.path
@@ -212,8 +186,6 @@ function makePath({ scale = .01, length = random(4000, 10000) }) {
 }
 
 
-var num = 2000;
-
 class Particle {
   constructor(_loc, _dir, _speed, _scale, _strength) {
     this.loc = _loc;
@@ -226,7 +198,7 @@ class Particle {
   }
   run() {
     this.move();
-    this.checkEdges();
+    // this.checkEdges();
     this.path.push({ x: this.loc.x / 100, y: this.loc.y / 100 })
   }
   move() {
@@ -245,9 +217,9 @@ class Particle {
     //float distance = dist(width/2, height/2, loc.x, loc.y);
     //if (distance>150) {
     if (this.loc.x < 0 || this.loc.x > 100 || this.loc.y < 0 || this.loc.y > 100) {
-      console.log("randomizing...", this.loc)
-      // this.loc.x = random(100);
-      // this.loc.y = random(100);
+      // console.log("randomizing...", this.loc)
+      this.loc.x = random(100);
+      this.loc.y = random(100);
     }
   }
 }
@@ -285,11 +257,14 @@ drawPaintedPath = ({
     canvas.translate(h_jt(), v_jt())
     if (pDrawLine > 0) {
       path.forEach(({ x, y }) => {
-        if (!(x > width || y > width || y < 0 || x < 0) &&
-          (d3.randomBernoulli(0.9)() > 0)) { // 10% 'dropout'
+        // don't draw out of bounds
+        x = x * width
+        y = y * height
+        // if (!(x > width || y > width || y < 0 || x < 0) &&
+        if (d3.randomBernoulli(0.9)() > 0) { // 10% 'dropout'
           canvas.circle(
-            x * width,
-            y * height,
+            x,
+            y,
             strokeWeight)
         }
       })
