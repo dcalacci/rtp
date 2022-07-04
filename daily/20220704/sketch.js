@@ -13,15 +13,16 @@ let palettes = [
 
 const settings = {
   palette: 0,
-  vJitter: 0.05,
+  density: 0.5,
+  strokeWeight: 0.1,
   hJitter: 0.1,
-  density: 0.9,
-  strokeWeight: 1,
+  vJitter: 0.05,
+  alpha: 0.2,
+  colorVariance: 0.3,
+  shape: 0,  // 0: lines; 1: dots
+  numLines: 2,
   backgroundColor: "#f9f9f9",
-  canvasColor: "#e4e4e4",
-  alpha: 0.9,
-  colorVariance: 0.2,
-  shape: 0  // 0: lines; 1: dots
+  canvasColor: "#e4e4e4"
 }
 
 let seed = 1243
@@ -52,6 +53,7 @@ function setup() {
   controllers.push(gui.add(settings, "strokeWeight", 0, 5, 0.1));
   controllers.push(gui.add(settings, "alpha", 0, 1, 0.01));
   controllers.push(gui.add(settings, "colorVariance", 0, 1, 0.01));
+  controllers.push(gui.add(settings, "numLines", 0, 5, 1));
   controllers.push(gui.addColor(settings, "backgroundColor"));
   controllers.push(gui.addColor(settings, "canvasColor"));
 
@@ -59,7 +61,7 @@ function setup() {
   controllers.forEach((c) => c.onChange(() => { clear(); redraw() }))
 
   colorMode(RGB);
-  pixelDensity(1)
+  pixelDensity(3)
   dim = Math.min(windowWidth, windowHeight);
   rectMode(CENTER);
 
@@ -94,44 +96,41 @@ function draw() {
     width: c.width * 0.9,
     height: c.height,
     canvas: c,
-    density: settings.density,
-    strokeWeight: settings.strokeWeight,
-    hJitter: settings.hJitter,
-    vJitter: settings.vJitter,
+    density: 0.9,
+    strokeWeight: 1,
+    hJitter: 0.1,
+    vJitter: 0.05,
     color: rectColor,     // color: "#F3D1C8",
-    colorVariance: settings.colorVariance,
-    alpha: settings.alpha,
+    colorVariance: 0.2,
+    alpha: 0.9
   })
   c.pop()
 
   // draw line
-  let path = makeParticlePath({
-    scale: 0.005,
-    strength: 20,
-    speed: 0.09,
-    length: random(10000, 50000)
-  })
+  _.range(settings.numLines).forEach(() => {
+    let path = makeParticlePath({
+      scale: 0.005,
+      strength: 20,
+      speed: 0.09,
+      length: random(10000, 50000)
+    })
 
-  push()
-  c.fill(0)
-  translate(c.width * 0.05, c.height * 0.05)
-  drawPaintedPath({
-    canvas: c,
-    density: 0.5,
-    strokeWeight: 0.1,
-    hJitter: 0.1,
-    vJitter: 0.05,
-    // color: _.sample(palette),
-    color: _.sample(_.without(palette, rectColor)),
-    colorVariance: 0.3,
-    alpha: 0.2,
-    path,
-    thickness: 20,
-    width: c.width * 0.9,
-    height: c.height * 0.9,
-    stripes: true
+
+    push()
+    c.fill(0)
+    translate(c.width * 0.05, c.height * 0.05)
+    drawPaintedPath({
+      ...settings,
+      canvas: c,
+      color: _.sample(_.without(palette, rectColor)),
+      path,
+      thickness: d3.randomNormal(18, 5)(),
+      width: c.width * 0.9,
+      height: c.height * 0.9,
+      stripes: true
+    })
+    pop()
   })
-  pop()
   image(c, 0, 0)
 }
 
@@ -258,7 +257,6 @@ drawPaintedPath = ({
 
     canvas.translate(-n * strokeWeight, n * strokeWeight)
 
-    let drawStripe = d3.randomBernoulli(0.2)() > 0
     if (pDrawLine > 0) {
       path.forEach(({ x, y }) => {
         canvas.push()
@@ -275,6 +273,7 @@ drawPaintedPath = ({
         }
         canvas.pop()
         if (texture) {
+          // textured noise along the ribbon
           if (d3.randomBernoulli(0.1)() > 0) {
             // let t = floor(thickness / 5)
             // if (n % t == 0 && Math.abs(n) > 2) {
@@ -284,16 +283,18 @@ drawPaintedPath = ({
             canvas.strokeWeight(strokeWeight / 10)
             canvas.circle(x, y, strokeWeight / 10)
             canvas.pop()
-            // }
           }
-        } else if (stripes && drawStripe) {
-          canvas.push()
-          canvas.stroke(0)
-          canvas.fill(0)
-          canvas.strokeWeight(strokeWeight / 10)
-          canvas.circle(x, y, strokeWeight / 10)
-          canvas.pop()
-
+        } else if (stripes) {
+          // stripes along the ribbon 
+          let t = floor(thickness / 5)
+          if (n % t == 0 && Math.abs(n) > 2) {
+            canvas.push()
+            canvas.stroke('#fff')
+            canvas.fill('#fff')
+            // canvas.strokeWeight(strokeWeight)
+            canvas.circle(x, y, strokeWeight / 2)
+            canvas.pop()
+          }
         }
       })
     }
