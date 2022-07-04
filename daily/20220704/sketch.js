@@ -12,7 +12,7 @@ let palettes = [
 
 
 const settings = {
-  palette: 0,
+  palette: 1,
   density: 0.5,
   strokeWeight: 0.1,
   hJitter: 0.1,
@@ -20,12 +20,13 @@ const settings = {
   alpha: 0.2,
   colorVariance: 0.3,
   shape: 0,  // 0: lines; 1: dots
-  numLines: 1,
+  numLines: 2,
   backgroundColor: "#f9f9f9",
   canvasColor: "#e4e4e4",
   lineScale: 0.005,
   lineStrength: 20,
-  lineSpeed: 0.09
+  lineSpeed: 0.09,
+  lineThickness: 0.9
 }
 
 let seed = 1243
@@ -60,6 +61,7 @@ function setup() {
   controllers.push(gui.add(settings, "lineScale", 0, 0.01, .001));
   controllers.push(gui.add(settings, "lineStrength", 1, 50, 1));
   controllers.push(gui.add(settings, "lineSpeed", 0, 1, 0.01));
+  controllers.push(gui.add(settings, "lineThickness", 0, 1, 0.01));
   controllers.push(gui.addColor(settings, "backgroundColor"));
   controllers.push(gui.addColor(settings, "canvasColor"));
 
@@ -124,12 +126,13 @@ function draw() {
     push()
     c.fill(0)
     translate(c.width * 0.05, c.height * 0.05)
+    let thickness = map(settings.lineThickness, 0, 1, 5, 30)
     drawPaintedPath({
       ...settings,
       canvas: c,
       color: _.sample(_.without(palette, rectColor)),
       path,
-      thickness: d3.randomNormal(18, 5)(),
+      thickness: d3.randomNormal(thickness, 2)(),
       width: c.width * 0.9,
       height: c.height * 0.9,
       stripes: true
