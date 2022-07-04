@@ -20,9 +20,12 @@ const settings = {
   alpha: 0.2,
   colorVariance: 0.3,
   shape: 0,  // 0: lines; 1: dots
-  numLines: 2,
+  numLines: 1,
   backgroundColor: "#f9f9f9",
-  canvasColor: "#e4e4e4"
+  canvasColor: "#e4e4e4",
+  lineScale: 0.005,
+  lineStrength: 20,
+  lineSpeed: 0.09
 }
 
 let seed = 1243
@@ -54,6 +57,9 @@ function setup() {
   controllers.push(gui.add(settings, "alpha", 0, 1, 0.01));
   controllers.push(gui.add(settings, "colorVariance", 0, 1, 0.01));
   controllers.push(gui.add(settings, "numLines", 0, 5, 1));
+  controllers.push(gui.add(settings, "lineScale", 0, 0.01, .001));
+  controllers.push(gui.add(settings, "lineStrength", 1, 50, 1));
+  controllers.push(gui.add(settings, "lineSpeed", 0, 1, 0.01));
   controllers.push(gui.addColor(settings, "backgroundColor"));
   controllers.push(gui.addColor(settings, "canvasColor"));
 
@@ -109,12 +115,11 @@ function draw() {
   // draw line
   _.range(settings.numLines).forEach(() => {
     let path = makeParticlePath({
-      scale: 0.005,
-      strength: 20,
-      speed: 0.09,
+      scale: settings.lineScale,
+      strength: settings.lineStrength,
+      speed: settings.lineSpeed,
       length: random(10000, 50000)
     })
-
 
     push()
     c.fill(0)
@@ -291,6 +296,7 @@ drawPaintedPath = ({
             canvas.push()
             canvas.stroke('#fff')
             canvas.fill('#fff')
+            // canvas.strokeWeight(d3.randomNormal(strokeWeight, 0.05)())
             // canvas.strokeWeight(strokeWeight)
             canvas.circle(x, y, strokeWeight / 2)
             canvas.pop()
