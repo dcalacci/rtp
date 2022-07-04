@@ -59,12 +59,12 @@ function setup() {
   controllers.forEach((c) => c.onChange(() => { clear(); redraw() }))
 
   colorMode(RGB);
-  pixelDensity(2)
+  pixelDensity(1)
   dim = Math.min(windowWidth, windowHeight);
   rectMode(CENTER);
 
   rng = d3.randomLcg(random())
-  seed = d3.randomUniform(0, 1000)()
+  seed = floor(d3.randomUniform(0, 1000)())
 
   noiseSeed(seed)
   randomSeed(seed);
@@ -128,7 +128,8 @@ function draw() {
     path,
     thickness: 20,
     width: c.width * 0.9,
-    height: c.height * 0.9
+    height: c.height * 0.9,
+    stripes: true
   })
   pop()
   image(c, 0, 0)
@@ -237,13 +238,16 @@ drawPaintedPath = ({
   path,
   thickness,
   width,
-  height
+  height,
+  stripes = false,
+  texture = false
 }) => {
   let h_jt = d3.randomNormal.source(rng)(0, hJitter)
   let v_jt = d3.randomNormal.source(rng)(0, vJitter)
   // nLines*.5 above and nLines*.5 below the path, yes?
   let nLines = ceil(thickness / strokeWeight) + 1
-  _.range(-nLines / 2, nLines / 2).forEach((n) => {
+  let nn = floor(nLines / 2)
+  _.range(-nn, nn).forEach((n) => {
     const pDrawLine = d3.randomBernoulli(map(density, 0, 1, 0.3, 1))()
     canvas.push()
     let c = getCloseColor(color, colorVariance) // varies color for each line
@@ -254,9 +258,11 @@ drawPaintedPath = ({
 
     canvas.translate(-n * strokeWeight, n * strokeWeight)
 
-    canvas.translate(h_jt(), v_jt())
+    let drawStripe = d3.randomBernoulli(0.2)() > 0
     if (pDrawLine > 0) {
       path.forEach(({ x, y }) => {
+        canvas.push()
+        canvas.translate(h_jt(), v_jt())
         // don't draw out of bounds
         x = x * width
         y = y * height
@@ -266,6 +272,28 @@ drawPaintedPath = ({
             x,
             y,
             strokeWeight)
+        }
+        canvas.pop()
+        if (texture) {
+          if (d3.randomBernoulli(0.1)() > 0) {
+            // let t = floor(thickness / 5)
+            // if (n % t == 0 && Math.abs(n) > 2) {
+            canvas.push()
+            canvas.stroke(0)
+            canvas.fill(0)
+            canvas.strokeWeight(strokeWeight / 10)
+            canvas.circle(x, y, strokeWeight / 10)
+            canvas.pop()
+            // }
+          }
+        } else if (stripes && drawStripe) {
+          canvas.push()
+          canvas.stroke(0)
+          canvas.fill(0)
+          canvas.strokeWeight(strokeWeight / 10)
+          canvas.circle(x, y, strokeWeight / 10)
+          canvas.pop()
+
         }
       })
     }
