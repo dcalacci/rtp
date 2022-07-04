@@ -106,11 +106,34 @@ function draw() {
 
   // draw line
 
-  push()
+  // var loc = createVector(random(0, 100), random(0, 100), 2);
+  // var angle = 0; //any value to initialize
+  // var dir = createVector(cos(angle), sin(angle));
+  // var speed = random(0.5, 2);
+  // // var speed = random(5,map(mouseX,0,width,5,20));   // faster
+  // let pp = new Particle(loc, dir, speed);
 
-  let scale = 0.01
-  let length = random(8000, 20000)
-  let path = makePath({ scale, length })
+  // let scale = 0.01
+  // let length = random(8000, 20000)
+
+  // _.range(length).forEach(() => {
+  //   pp.run()
+  // })
+
+  let path = makeParticlePath({
+    scale: 0.002,
+    strength: 10,
+    speed: 0.01,
+    length: random(8000, 15000)
+  })
+
+  console.log("particle path:", path, path[0])
+
+  c.push()
+
+  // let path = pp.path
+  // let path = makePath({ scale, length })
+  // c.translate(0.1 * width, 0.05 * height)
   drawPaintedPath({
     canvas: c,
     density: 0.5,
@@ -122,9 +145,11 @@ function draw() {
     colorVariance: 0.3,
     alpha: 0.2,
     path,
-    thickness: 10,
-    noiseScale: 0.005,
+    thickness: 1,
+    width: c.width * 0.9,
+    height: c.height
   })
+  c.pop()
   //OLD
   // drawLine(c)
   // _.range(2).forEach((n) => {
@@ -162,17 +187,71 @@ function drawLine(c) {
   c.pop()
 }
 
+function makeParticlePath({ scale = .01, speed = 0.1, strength = 1, length = 8000 }) {
+  var loc = createVector(random(0, 100), random(0, 100), 2);
+  var angle = 0; //any value to initialize
+  var dir = createVector(cos(angle), sin(angle));
+  // var speed = random(5,map(mouseX,0,width,5,20));   // faster
+  let pp = new Particle(loc, dir, speed, scale, strength);
+  _.range(length).forEach(() => {
+    pp.run()
+  })
+  return pp.path
+}
+
 function makePath({ scale = .01, length = random(4000, 10000) }) {
   let t = 0
   let path = []
-  _.range(length).forEach((l) => {
+  _.range(length).forEach(() => {
     var x = noise((t + 10) * scale);
     var y = noise((t + 5) * scale);
     path.push({ x, y })
-    t += 0.01
+    t += 1
   })
   return path
 }
+
+
+var num = 2000;
+
+class Particle {
+  constructor(_loc, _dir, _speed, _scale, _strength) {
+    this.loc = _loc;
+    this.dir = _dir;
+    this.speed = _speed;
+    this.scale = _scale;
+    this.strength = _strength;
+    this.path = []
+    // var col;
+  }
+  run() {
+    this.move();
+    this.checkEdges();
+    this.path.push({ x: this.loc.x / 100, y: this.loc.y / 100 })
+  }
+  move() {
+    let angle = noise(
+      this.loc.x * this.scale,
+      this.loc.y * this.scale,
+      frameCount * this.scale) * TWO_PI * this.strength; //0-2PI
+    this.dir.x = cos(angle);
+    this.dir.y = sin(angle);
+    var vel = this.dir.copy();
+    var d = 1;  //direction change 
+    vel.mult(this.speed * d); //vel = vel * (speed*d)
+    this.loc.add(vel); //loc = loc + vel
+  }
+  checkEdges() {
+    //float distance = dist(width/2, height/2, loc.x, loc.y);
+    //if (distance>150) {
+    if (this.loc.x < 0 || this.loc.x > 100 || this.loc.y < 0 || this.loc.y > 100) {
+      console.log("randomizing...", this.loc)
+      // this.loc.x = random(100);
+      // this.loc.y = random(100);
+    }
+  }
+}
+
 
 drawPaintedPath = ({
   canvas,
@@ -185,11 +264,12 @@ drawPaintedPath = ({
   alpha,
   path,
   thickness,
+  width,
+  height
 }) => {
   let h_jt = d3.randomNormal.source(rng)(0, hJitter)
   let v_jt = d3.randomNormal.source(rng)(0, vJitter)
   // nLines*.5 above and nLines*.5 below the path, yes?
-  let nn = floor(thickness / 2)
   let nLines = ceil(thickness / strokeWeight) + 1
   _.range(-nLines / 2, nLines / 2).forEach((n) => {
     const pDrawLine = d3.randomBernoulli(map(density, 0, 1, 0.3, 1))()
@@ -203,14 +283,15 @@ drawPaintedPath = ({
     canvas.translate(-n * strokeWeight, n * strokeWeight)
 
     canvas.translate(h_jt(), v_jt())
-    let N = map(density, 0, 1, 50, 200)
     if (pDrawLine > 0) {
       path.forEach(({ x, y }) => {
-        if (d3.randomBernoulli(0.9)() > 0) // 10% 'dropout'
+        if (!(x > width || y > width || y < 0 || x < 0) &&
+          (d3.randomBernoulli(0.9)() > 0)) { // 10% 'dropout'
           canvas.circle(
             x * width,
             y * height,
             strokeWeight)
+        }
       })
     }
     canvas.pop()
