@@ -1,4 +1,5 @@
 
+p5.disableFriendlyErrors = true
 let WIDTH = 1280
 let HEIGHT = 1280
 let gui;
@@ -17,16 +18,16 @@ const settings = {
   strokeWeight: 0.1,
   hJitter: 0.1,
   vJitter: 0.05,
-  alpha: 0.4,
+  alpha: 0.2,
   colorVariance: 0.3,
   shape: 0,  // 0: lines; 1: dots
   numLines: 1,
   backgroundColor: "#f9f9f9",
   canvasColor: "#e4e4e4",
-  lineLengthMean: 10000,
+  lineLengthMean: 20000,
   lineLengthVar: 5000,
-  lineThicknessMean: 50,
-  lineThicknessVar: 25,
+  lineThicknessMean: 30,
+  lineThicknessVar: 15,
   lineScale: 0.01,
   lineStrength: 25,
   lineSpeed: 0.09,
@@ -169,12 +170,13 @@ function getCloseColor(c, variance) {
 function drawLine(c) {
   let path = makePath()
   c.push()
-  path.forEach(({ x, y }) => {
+  for (let p = 0; p < path.length; p += 1) {
+    let { x, y } = path[p]
     c.noStroke()
     c.fill(0, 20)
     d = random(0.002 * c.height, 0.003 * c.height);
     c.circle(x, y, d);
-  })
+  }
   c.pop()
 }
 
@@ -184,10 +186,10 @@ function makeParticlePath({ scale = .01, speed = 0.1, strength = 1, length = 800
   var dir = createVector(cos(angle), sin(angle));
   // var speed = random(5,map(mouseX,0,width,5,20));   // faster
   let pp = new Particle(loc, dir, speed, scale, strength);
-  _.range(length).forEach(() => {
+  for (let i = 0; i < length; i += 1) {
     console.log('.')
     pp.run()
-  })
+  }
   return pp.path
 }
 
@@ -265,7 +267,7 @@ drawPaintedPath = ({
   // nLines*.5 above and nLines*.5 below the path, yes?
   let nLines = ceil(thickness / strokeWeight) + 1
   let nn = floor(nLines / 2)
-  _.range(-nn, nn).forEach((n) => {
+  for (let n = -nn; n < nn; n += 1) {
     const pDrawLine = d3.randomBernoulli(map(density, 0, 1, 0.3, 1))()
     canvas.push()
     let c = getCloseColor(color, colorVariance) // varies color for each line
@@ -274,20 +276,21 @@ drawPaintedPath = ({
     canvas.fill(c)
     canvas.strokeWeight(d3.randomNormal(strokeWeight, 2)())
 
-    canvas.translate(-n * strokeWeight, n * strokeWeight)
+    // canvas.translate(-n * strokeWeight, n * strokeWeight)
 
     if (pDrawLine > 0) {
-      path.forEach(({ x, y }) => {
+      for (let p = 0; p < path.length; p += 1) {
+        let { x, y } = path[p]
         canvas.push()
-        canvas.translate(h_jt(), v_jt())
+        // canvas.translate(h_jt(), v_jt())
         // don't draw out of bounds
         x = x * width
         y = y * height
         // if (!(x > width || y > width || y < 0 || x < 0) &&
         if (d3.randomBernoulli(0.9)() > 0) { // 10% 'dropout'
           canvas.circle(
-            x,
-            y,
+            x + h_jt() - (n * strokeWeight),
+            y + v_jt() + (n * strokeWeight),
             strokeWeight)
         }
         canvas.pop()
@@ -318,10 +321,10 @@ drawPaintedPath = ({
             canvas.pop()
           }
         }
-      })
+      }
     }
     canvas.pop()
-  })
+  }
 }
 
 drawPaintedRect = ({
@@ -354,13 +357,13 @@ drawPaintedRect = ({
   let h = height || canvas.height
   let w = width || canvas.width
 
-  _.range(nLayers).forEach((i) => {
+  for (let i = 0; i < nLayers; i += 1) {
     let nLines = Math.ceil(h / strokeWeight) + 1
     canvas.push()
     canvas.translate(0, d3.randomNormal.source(rng)(0, 0.5)())
     // randomizes if we draw from R->L or L->R
     let direction = random([-1, 1])
-    _.range(nLines).forEach((n) => {
+    for (let n = 0; n < nLines; n += 1) {
       let c = getCloseColor(color, colorVariance) // varies color for each line
       c.setAlpha(alpha)
       canvas.stroke(c)
@@ -379,7 +382,7 @@ drawPaintedRect = ({
         // adding some randomness here avoids a dot-matrix effect
         N = N + floor(random(-10, 10))
 
-        _.range(N).forEach((i) => {
+        for (let i = 0; i < N; i += 1) {
           // change direction. we do this so we're not rotatating same direction
           // each time. If you do, you get a kind of dissolving effect which is nice,
           let j = direction < 0 ? N - i : i
@@ -390,11 +393,11 @@ drawPaintedRect = ({
               j * d,
               n * strokeWeight * 0.9,
               strokeWeight)
-        })
+        }
       }
       canvas.pop()
-    })
-  })
+    }
+  }
   console.log("drawing..")
   canvas.pop()
 }
