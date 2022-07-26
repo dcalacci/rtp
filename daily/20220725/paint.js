@@ -42,10 +42,63 @@ function rep(fn, d, n) {
   return res
 }
 
-function drawBrushMark(c, settings) {
+function drawBrushMarks(globalSettings, allPolySettings) {
   c.push()
   c.noStroke()
   c.colorMode(HSB)
+
+  console.log("layer colors:", _.map(allPolySettings, 'color'))
+
+
+  let layers = []
+  allPolySettings.forEach((settings) => {
+    layers.push(
+      new Array(settings.nLayers).fill()
+        .map((x, i) => deform(
+          poly(settings.polyRadius,
+            noise(i) * settings.noiseScale),
+          settings.polyDeformN, settings.polyDeformVar))
+    )
+  })
+
+  const totalLayers = _.sumBy(allPolySettings, 'nLayers')
+
+  for (let i = 0; i < totalLayers; i++) {
+    let polyIdx = _.random(0, allPolySettings.length - 1)
+    let settings = allPolySettings[polyIdx]
+    let polyLayer = layers[polyIdx]
+    let polyColor = color(
+      settings.color.h,
+      settings.color.s,
+      settings.color.b)
+    polyColor.setAlpha(settings.alpha)
+
+    c.push()
+    c.fill(polyColor)
+    c.translate(
+      randomGaussian(settings.polyX, settings.polyLayerStdX),
+      randomGaussian(settings.polyY, settings.polyLayerStdY))
+    drawPoly(c,
+      polyLayer[i % polyLayer.length])
+    c.pop()
+  }
+  c.pop()
+
+}
+
+
+
+function drawBrushMark(c, settings) {
+  console.log(`Drawing mark with settings:`, settings)
+  c.push()
+  c.noStroke()
+  c.colorMode(HSB)
+
+  let polyColor = color(
+    settings.color.h,
+    settings.color.s,
+    settings.color.b)
+  polyColor.setAlpha(settings.alpha)
 
   let redLayers = new Array(settings.nLayers).fill()
     .map((x, i) => deform(
@@ -61,7 +114,9 @@ function drawBrushMark(c, settings) {
 
   for (let i = 0; i < redLayers.length + yellowLayers.length; i++) {
     if (Math.floor(i / 5) % 2 == 0) {
-      c.fill(351, 32, 98, settings.alpha1)
+      c.fill(polyColor)
+      // c.fill(settings.color, settings.alpha1)
+      // c.fill(351, 32, 98, settings.alpha1)
       c.push()
       c.translate(
         randomGaussian(settings.poly1X, settings.polyLayerStdX),

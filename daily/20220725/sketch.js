@@ -11,25 +11,37 @@ let polyColors = [
 ]
 
 // default, min, max, step
-const globalSettings = {
-  stdScale: [1., 0, 10, 0.1],
-  nLayers: [50, 10, 200, 1],
-  noiseScale: [10, 1, 200, 1],
-  polyDeformN: [4, 2, 8, 1],
-  polyDeformVar: [0.2, 0.1, 2.0, 0.01],
-  polyLayerStdX: [20, 0, 200, 1],
-  polyLayerStdY: [20, 0, 200, 1],
+const globalParams = {
+  bde: [1, 0, 100, 1]
 }
 
-const polySettings = {
+const polygonParams = {
+  nLayers: [50, 10, 200, 1],
+  stdScale: [1., 0, 10, 0.1],
   polyRadius: [100, 20, 500, 10],
   alpha: [0.05, 0.01, 0.8, 0.01],
   polyX: [0, -WIDTH / 2, WIDTH / 2, 1],
   polyY: [0, -HEIGHT / 2, HEIGHT / 2, 1],
+  polyDeformN: [4, 2, 8, 1],
+  polyDeformVar: [0.2, 0.1, 2.0, 0.01],
+  polyLayerStdX: [20, 0, 200, 1],
+  polyLayerStdY: [20, 0, 200, 1],
+  noiseScale: [10, 1, 200, 1]
 }
 
-const globalDefaults = _.mapValues(globalSettings, (o) => o[0])
-const polyDefaults = _.mapValues(globalSettings, (o) => o[0])
+const globalSettings = _.mapValues(globalParams, (o) => o[0])
+let polySettings = _.mapValues(polygonParams, (o) => o[0])
+// polySettings.color = { h: 0, s: 0, b: 0 }
+
+let allPolySettings = polyColors.map((c) => {
+  return {
+    ...polySettings,
+    color: {
+      h: c[0], s: c[1], b: c[2]
+    }
+  }
+})
+console.log("All poly settings:", allPolySettings)
 
 let seed = 1243
 function keyPressed() {
@@ -38,7 +50,7 @@ function keyPressed() {
     save(fname + "_" + seed + ".png")
     saveJSON(
       //TODO: add polygon settings
-      { global: globalSettings },
+      { global: globalParams },
       fname + ".json")
   }
 }
@@ -61,14 +73,24 @@ function setup() {
   // Global folder
   let global = gui.addFolder('global')
   controllers = []
-  _.forEach(globalSettings, (([dd, min, max, step], k) => {
-    controllers.push(global.add(globalDefaults, k, min, max, step));
+  _.forEach(globalParams, (([dd, min, max, step], k) => {
+    controllers.push(global.add(globalSettings, k, min, max, step));
   }))
   var obj = { REDRAW: function() { redraw() } };
   controllers.push(global.add(obj, 'REDRAW'))
   controllers.forEach((con) => con.onChange(() => { clear(); redraw() }))
 
-  // const polyFolderN = gui.addFolder(`Poly ${n}`)
+  // Polygons
+  polyControllers = []
+  polyColors.forEach(([h, s, b], n) => {
+    const polyFolderN = gui.addFolder(`Poly${n}`)
+    const thisPolySettings = allPolySettings[n]
+    // indexed by n
+    _.forEach(polygonParams, (([dd, min, max, step], k) => {
+      polyControllers.push(polyFolderN.add(thisPolySettings, k, min, max, step))
+    }))
+  })
+  polyControllers.forEach((con) => con.onChange(() => { clear(); redraw() }))
 
   rng = d3.randomLcg(random())
 
@@ -89,7 +111,7 @@ function draw() {
   push()
   c.background(240)
   c.translate(c.width / 2, c.height / 2)
-  // drawBrushMark(c, globalDefaults)
+  drawBrushMarks(globalSettings, allPolySettings)
   c.translate(c.width * 0.1, c.height * 0.075)
   image(c, width * 0.05, height * 0.05)
   pop()
