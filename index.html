@@ -8,30 +8,66 @@
   <title>rtp 2022</title>
   <link rel="stylesheet" type="text/css" href="style.css" />
 
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/underscore@1.13.2/underscore-umd-min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clifford: '#da373d',
+          }
+        }
+      }
+    }
+  </script>
+
   <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 
 <body>
   <nav>
-    <h1>recreating the past 2022</h1>
+    <h1>working copy</h1>
     <p><a href="https://dcalacci.net">by dan calacci</a></p>
-    <p>
 
-      <a href="/vera">vera molnar</a>
-      <a href="/john">john whitney</a>
-      <a href="/muriel">muriel cooper</a>
-      <a href="/ken">ken knowlton</a>
-      <a href="/anni">anni albers</a>
-      <a href="/camille">camille utterback</a>
-    </p>
   </nav>
-  <main id="main">
-  </main>
+  <div class="container mx-auto">
+    <h1 class="text-violet-900 text-3xl  font-mono font-bold">daily sketches</h1>
+    <div
+      class="grid grid-cols-3 gap-2 m-10 font-mono font-semibold underline-offset-8 accent-zinc-800 text-violet-900 visited:text-violet-600">
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220505">20220505</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220508">20220508</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220509">20220509</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220510">20220510</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220511">20220511</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220515">20220515</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220522">20220522</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220530">20220530</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220601">20220601</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220604">20220604</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220630">20220630</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220630_1">20220630_1</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220704">20220704</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220724">20220724</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220725">20220725</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220802">20220802</a>
+      <a class="visited:text-violet-600 hover:underline" href="/daily/20220819">20220819</a>
+    </div>
 
-  <script src="sketch.js"></script>
+    <h1 class="text-violet-900 text-3xl font-mono font-bold">recreations</h1>
+    <div
+      class="grid grid-cols-3 gap-2 m-10 font-mono font-semibold underline-offset-8 accent-zinc-800 text-violet-900 visited:text-violet-600">
+      <a class="visited:text-violet-600 hover:underline" href="/vera">vera molnar</a>
+      <a class="visited:text-violet-600 hover:underline" href="/muriel">muriel cooper</a>
+      <a class="visited:text-violet-600 hover:underline" href="/john">john whitney</a>
+      <a class="visited:text-violet-600 hover:underline" href="/ken">ken knowlton</a>
+      <a class="visited:text-violet-600 hover:underline" href="/anni">anni albers</a>
+      <a class="visited:text-violet-600 hover:underline" href="/camille">camille utterback</a>
+    </div>
+  </div>
 </body>
 
 </html>
