@@ -7,7 +7,8 @@ let colors = ["#FFA69E", "#9CAFB7", "#344055", "#E9EB9E", "#A30000", "#303030"]
 
 let polyColors = [
   [351, 32, 98],
-  [271, 32, 98]
+  [271, 32, 98],
+  [154, 18, 90]
 ]
 
 // default, min, max, step
@@ -16,29 +17,62 @@ const globalParams = {
 }
 
 const polygonParams = {
-  nLayers: [50, 10, 200, 1],
+  nLayers: [100, 100, 1000, 1],
   stdScale: [1., 0, 10, 0.1],
-  polyRadius: [100, 20, 500, 10],
-  alpha: [0.05, 0.01, 0.8, 0.01],
+  polyRadius: [100, 100, 300, 10],
+  alpha: [0.05, 0.01, 0.5, 0.01],
   polyX: [0, -WIDTH / 2, WIDTH / 2, 1],
   polyY: [0, -HEIGHT / 2, HEIGHT / 2, 1],
   polyDeformN: [4, 2, 8, 1],
   polyDeformVar: [0.2, 0.1, 2.0, 0.01],
-  polyLayerStdX: [20, 0, 200, 1],
-  polyLayerStdY: [20, 0, 200, 1],
-  noiseScale: [10, 1, 200, 1]
+  polyLayerStdX: [100, 50, 200, 1],
+  polyLayerStdY: [100, 50, 300, 1],
+  noiseScale: [10, 10, 100, 1]
 }
 
 const globalSettings = _.mapValues(globalParams, (o) => o[0])
 let polySettings = _.mapValues(polygonParams, (o) => o[0])
 // polySettings.color = { h: 0, s: 0, b: 0 }
 
-let allPolySettings = polyColors.map((c) => {
+let hband = (HEIGHT / 2) / 3
+let allPolySettings = _.shuffle(polyColors).map((c, n) => {
+  let hmin = (-HEIGHT / 4) + (hband * n)
+  let hmax = hmin + hband
   return {
     ...polySettings,
+    n,
     color: {
       h: c[0], s: c[1], b: c[2]
-    }
+    },
+    polyX: _.random(-WIDTH / 4, WIDTH / 4),
+    polyY: _.random(hmin, hmax),
+    polyRadius: _.random(
+      polygonParams.polyRadius[1],
+      polygonParams.polyRadius[2]
+    ),
+    polyLayerStdX: _.random(
+      polygonParams.polyLayerStdX[1],
+      polygonParams.polyLayerStdX[2],
+    ),
+    polyLayerStdY: _.random(
+      polygonParams.polyLayerStdY[1],
+      polygonParams.polyLayerStdY[2],
+    ),
+    nLayers: _.random(
+      polygonParams.nLayers[1],
+      polygonParams.nLayers[2],
+    ),
+    alpha: _.random(
+      polygonParams.alpha[1],
+      polygonParams.alpha[2],
+    ),
+    noiseScale: _.random(
+      polygonParams.noiseScale[1],
+      polygonParams.noiseScale[2],
+    )
+
+
+
   }
 })
 console.log("All poly settings:", allPolySettings)
@@ -46,11 +80,14 @@ console.log("All poly settings:", allPolySettings)
 let seed = 1243
 function keyPressed() {
   if (key == "s") {
-    fname = new Date().toJSON()
+    fname = 'daily_' + new Date().toJSON()
     save(fname + "_" + seed + ".png")
     saveJSON(
       //TODO: add polygon settings
-      { global: globalParams },
+      {
+        global: globalParams,
+        polygons: _.keyBy(allPolySettings, 'n')
+      },
       fname + ".json")
   }
 }

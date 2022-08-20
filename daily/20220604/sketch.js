@@ -61,30 +61,36 @@ function draw() {
     for (let y = 0; y < divs; y++) {
       for (let x = 0; x < divs; x++) {
         push();
-        getTranslation(x, y, z, frameCount)
         let tt = getTransform(x, y, z, frameCount)
+        let tr = getTranslation(x, y, z, frameCount)
+
+        translate(tr[0] * (1 + tt[0]), tr[1] * (1 + tt[1]), tr[2] * (1 + tt[2]))
         // tt = [1, 1, 1]
-        box(
-          (boxWidth - spacing / 2) * tt[0],
-          (boxWidth - spacing / 2) * tt[1],
-          (boxWidth - spacing / 2) * tt[2]);
+        if (tt[0] > 0) {
+          box(
+            (boxWidth - spacing / 2) * tt[0],
+            (boxWidth - spacing / 2) * tt[1],
+            (boxWidth - spacing / 2) * tt[2]);
+        }
         pop();
       }
     }
   }
 }
 
+//position
 function getTranslation(x, y, z, t) {
   let vertOffset = boxWidth - spacing;
 
   let d = dist(0, 0, 0, x, y, z);
-  translate(
+  return ([
     getDimTranslation(0, x, t, d) + vertOffset,
     getDimTranslation(1, y, t, d) + vertOffset,
     getDimTranslation(2, z, t, d) + vertOffset,
-  )
+  ])
 }
 
+let dd = 0.04
 
 function getDimTranslation(dimName, dimIndex, t, d) {
   let pos = map(dimIndex, 0, divs, -size / 2, size / 2)
@@ -101,25 +107,20 @@ function getDimTranslation(dimName, dimIndex, t, d) {
       lastMax[dimName][dimIndex] = t
     }
   }
+  let dc = map(d, -1, 1, 1, 1 + dd)
   return vertOffset + pos //dimOffset + pos //* map(cos((PI / 4 * d) / width + (frameCount / 30)), 0, 1, 1, 1.2)
 
 }
 
 function getTransform(x, y, z, t) {
-  let distFromCamera = dist(-10, 0, -10, x, y, z);
+  let distFromCamera = dist(-10, -10, -10, x, y, z);
   let vertOffset = boxWidth - spacing;
+  let distFromCenter = dist(0, 0, 0, x, y, z);
 
   return [x, y, z].map((d, i) => {
     let pos = map(d, 0, divs, -size / 2, size / 2)
     let offset = (d) => map(d, -size / 2, size / 2, -1, 1)
-    // let dimOffset = map(sin(distFromCenter + frames[i][d] / 30), -1, 1, 0.5, 1.2)
     let dimOffset = map(sin(frameCount / 10 * offset(distFromCamera)), -1, 1, -.5, 1)
-    return dimOffset // * distFromCenter / 3//* map(noise((frameCount * d * i / 100)), 0, 1, 0.8, 1)
+    return dimOffset + map(distFromCenter, -1, 1, 0, dd)
   })
-  // return (
-  //   cos(
-  //     (PI / 2 * distFromCenter) /
-  //     width + frameCount / 30) / 2 +
-  //   0.1
-  // );
 }

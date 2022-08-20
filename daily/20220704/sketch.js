@@ -7,26 +7,30 @@ let bgCol = "#f9f9f9"
 
 let palettes = [
   ["#D1C5DE", "#DEBFB6", "#A6C6C1", "#5297AB"],
-  ["#D85F52", "#45998A", "#67839D", "#DDA606"]
+  ["#401F3E", "#45998A", "#67839D", "#DDA606"]
 ]
 
 
 const settings = {
   palette: 1,
-  density: 0.5,
+  density: 0.6,
   strokeWeight: 0.1,
   hJitter: 0.1,
   vJitter: 0.05,
-  alpha: 0.2,
+  alpha: 0.4,
   colorVariance: 0.3,
   shape: 0,  // 0: lines; 1: dots
-  numLines: 2,
+  numLines: 3,
   backgroundColor: "#f9f9f9",
   canvasColor: "#e4e4e4",
-  lineScale: 0.005,
-  lineStrength: 20,
+  lineLengthMean: 50000,
+  lineLengthVar: 10000,
+  lineThicknessMean: 50,
+  lineThicknessVar: 25,
+  lineScale: 0.01,
+  lineStrength: 25,
   lineSpeed: 0.09,
-  lineThickness: 0.9
+  lineMode: 1
 }
 
 let seed = 1243
@@ -58,12 +62,18 @@ function setup() {
   controllers.push(gui.add(settings, "alpha", 0, 1, 0.01));
   controllers.push(gui.add(settings, "colorVariance", 0, 1, 0.01));
   controllers.push(gui.add(settings, "numLines", 0, 5, 1));
+  controllers.push(gui.add(settings, "lineLengthMean", 10000, 100000, 1000));
+  controllers.push(gui.add(settings, "lineLengthVar", 1000, 50000, 1000));
   controllers.push(gui.add(settings, "lineScale", 0, 0.01, .001));
   controllers.push(gui.add(settings, "lineStrength", 1, 50, 1));
   controllers.push(gui.add(settings, "lineSpeed", 0, 1, 0.01));
-  controllers.push(gui.add(settings, "lineThickness", 0, 1, 0.01));
+  controllers.push(gui.add(settings, "lineThicknessMean", 5, 100, 1));
+  controllers.push(gui.add(settings, "lineThicknessVar", 5, 100, 1));
+  controllers.push(gui.add(settings, "lineMode", 0, 1, 1));
   controllers.push(gui.addColor(settings, "backgroundColor"));
   controllers.push(gui.addColor(settings, "canvasColor"));
+  var obj = { REDRAW: function() { redraw() } };
+  controllers.push(gui.add(obj, 'REDRAW'))
 
   // redraw everything on slider change for noLoop sketches.
   controllers.forEach((c) => c.onChange(() => { clear(); redraw() }))
@@ -120,19 +130,18 @@ function draw() {
       scale: settings.lineScale,
       strength: settings.lineStrength,
       speed: settings.lineSpeed,
-      length: random(10000, 50000)
+      length: d3.randomNormal(settings.lineLengthMean, settings.lineLengthVar)()
     })
 
     push()
     c.fill(0)
     translate(c.width * 0.05, c.height * 0.05)
-    let thickness = map(settings.lineThickness, 0, 1, 5, 30)
     drawPaintedPath({
       ...settings,
       canvas: c,
       color: _.sample(_.without(palette, rectColor)),
       path,
-      thickness: d3.randomNormal(thickness, 2)(),
+      thickness: d3.randomNormal(settings.lineThicknessMean, settings.lineThicknessVar)(),
       width: c.width * 0.9,
       height: c.height * 0.9,
       stripes: true
@@ -246,6 +255,7 @@ drawPaintedPath = ({
   thickness,
   width,
   height,
+  lineMode = 0,
   stripes = false,
   texture = false
 }) => {
@@ -299,7 +309,9 @@ drawPaintedPath = ({
             canvas.push()
             canvas.stroke('#fff')
             canvas.fill('#fff')
-            // canvas.strokeWeight(d3.randomNormal(strokeWeight, 0.05)())
+            if (lineMode == 1) {
+              canvas.strokeWeight(d3.randomNormal(strokeWeight, 0.5)())
+            }
             // canvas.strokeWeight(strokeWeight)
             canvas.circle(x, y, strokeWeight / 2)
             canvas.pop()
