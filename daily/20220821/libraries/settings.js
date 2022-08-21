@@ -11,6 +11,8 @@ let _GUI = function(settings) {
 
 _GUI.prototype.startGUI = function(redrawSketch) {
   controllers = []
+  // filter out any without value ranges
+  // let st = _.omitBy(settings, (x) => x.length < 2)
   _.forEach(settings, (([dd, min, max, step], k) => {
     controllers.push(this.gui.add(this.config, k, min, max, step));
   }))

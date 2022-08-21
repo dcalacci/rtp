@@ -5,9 +5,11 @@ let bgCol = "#f9f9f9"
 let GUI
 
 let colors = ["#FFA69E", "#9CAFB7", "#344055", "#E9EB9E", "#A30000", "#303030"]
+const LINECOLOR = "#401F3E"
 
 // custom vars for this sketch
 let particle_sets = [];
+let perspT
 
 const settings = {
   number_of_particles: [500, 100, 10000, 100],
@@ -19,11 +21,11 @@ const settings = {
   particle_speed: [3, 1, 100, 1],
   noise_scale: [0.6, 0.1, 5.0, 0.01],
   noise_buffer: [0.2, 0.1, 1, 0.01],
-  particle_curl: [2, 0.1, 10, 0.01]
+  particle_curl: [2, 0.1, 10, 0.01],
+  y_transform: [0.45, 0.1, 0.9, 0.01],
+  x_transform: [0.75, 0.1, 0.9, 0.01],
+  same_seed: [false]
 }
-
-
-const LINECOLOR = "#401F3E"
 
 
 function preload() {
@@ -34,11 +36,13 @@ function redrawSketch() {
   c.clear();
   redraw();
   c.redraw();
-
-  SEED = Math.floor(Math.random() * 100000)
   c.background("#EFAF0E")
-  randomSeed(SEED);
-  noiseSeed(SEED);
+  if (!GUI.config.same_seed) {
+    SEED = Math.floor(Math.random() * 100000)
+    randomSeed(SEED);
+    noiseSeed(SEED);
+  }
+  makeParticles()
 }
 
 
@@ -66,26 +70,25 @@ function setup() {
   GUI = new _GUI(settings)
   GUI.startGUI(redrawSketch)
 
+  //perspectiveTransform
+
+  let transformedWidth = c.width - c.width * GUI.config.x_transform
+  let transformedHeight = c.height - c.height * GUI.config.y_transform
+  var sourceCorners = [0, 0, c.width, 0, c.width, c.height, 0, c.height];
+  var destCorners = [
+    transformedWidth,
+    transformedHeight,
+    c.width - transformedWidth,
+    transformedHeight,
+    c.width - transformedWidth,
+    c.height - transformedHeight,
+    transformedWidth,
+    c.height - transformedHeight,
+  ]
+
+  console.log(sourceCorners, destCorners)
+  perspT = PerspT(sourceCorners, destCorners)
   makeParticles()
-
-}
-
-function makeParticles() {
-  particle_sets = [];
-  for (var j = 0; j < GUI.config.number_of_particle_sets; j++) {
-    let ps = [];
-    for (var i = 0; i < GUI.config.number_of_particles; i++) {
-      ps.push(
-        new Particle(
-          randomGaussian(2 * width / 3, width),
-          randomGaussian(5 * height / 6, height / 2),
-          random(TWO_PI)
-        )
-      );
-    }
-    particle_sets.push(ps);
-  }
-
 }
 
 
@@ -99,85 +102,43 @@ function draw() {
   c.stroke(cc)
   c.strokeWeight(0.8);
 
-  if (particle_sets.length == GUI.config.number_of_particle_sets) {
+  if (particle_sets == undefined) { }
+  else if (particle_sets.length == GUI.config.number_of_particle_sets) {
     for (let i = 0; i < GUI.config.number_of_particle_sets; i++) {
       for (let j = 0; j < GUI.config.number_of_particles; j++) {
-        particle_sets[i][j].update(i)
-        particle_sets[i][j].display(c)
+        if (particle_sets[i][j] == undefined) { }
+        else {
 
+          particle_sets[i][j].update(i)
+          drawParticle(c, particle_sets[i][j])
+
+        }
       }
     }
   }
-
-  // c.background(240)
-  // Draw here
   //display canvas
   image(c, width * 0.05, height * 0.05)
 }
 
-class Particle {
-  constructor(x, y, phi) {
-    this.pos = createVector(x, y);
-    this.angle = phi;
-    this.val = 0;
-    this.altitude = 0;
-  }
+function drawParticle(c, p) {
+  let bw = GUI.config.band_width / 2
+  if (p.val > 0.5 - bw && p.val < 0.5 + bw) {
+    c.push();
+    // let _point = perspT.transform(
+    //   p.pos.x * width,
+    //   p.pos.y * height)// + 1500 - p.altitude * 10)
+    // c.point(
+    //   _point[0],
+    //   _point[1]
+    // )
+    c.point(p.pos.x * c.width, p.pos.y * c.height)
+    c.pop();
+    // c.translate(p.pos.x, this.pos.y + 10 - this.altitude * 40 * map(this.pos.y, 0, height + 100 * GUI.config.zoom, 1, 4));
+    // c.rotate(this.angle);
+    // c.point(0, 0)
+    // randomGaussian(0, 0.05),
+    // randomGaussian(0, 0.05))
+    // c.point(0, 0);
 
-  update(index) {
-    this.pos.x += cos(this.angle) * GUI.config.particle_speed;
-    this.pos.y += sin(this.angle) * GUI.config.particle_speed;
-
-    this.checkEdges()
-
-    // scaling perspective
-    let scale = map(this.pos.y, 0, height + 200, 3, 0.33)
-
-    let nx = scale * map(this.pos.x, 0, width, -1, 1)
-    let ny = 2 * scale * map(this.pos.y, 0, height, -1, 1)
-
-    // let nx = map(this.pos.y, 0, height + 100, 4, 0.5) * map(this.pos.x, 0, width, -1, 1);
-    // let ny = 2 * map(this.pos.y, 0, height + 100, 4, 1) * map(this.pos.y, 0, height, -1, 1);
-
-    let n = createVector(nx, ny);
-
-    // this.altitude = noise(n.x + 423.2, n.y - 231.1) * config.noise_scale;
-    this.altitude = noise(n.x + width / 2, n.y + height / 2) * GUI.config.noise_scale + GUI.config.noise_buffer;
-    let bandLevel = GUI.config.band_dist * index % 2;
-
-    let nval = (this.altitude + GUI.config.band_dist *
-      (index - GUI.config.number_of_particle_sets / 2)) % 1;
-
-
-    this.angle += GUI.config.particle_curl * map(nval, 0, 1, -1, 1);
-    this.val = nval;
-  }
-
-  checkEdges() {
-    //float distance = dist(width/2, height/2, loc.x, loc.y);
-    //if (distance>150) {
-    if (this.pos.x < -100 || this.pos.x > width || this.pos.y < -100 || this.pos.y > height) {
-      // console.log("randomizing...", this.loc)
-      this.pos.x = randomGaussian(2 * width / 3, width)
-      this.pos.y = randomGaussian(5 * height / 6, height / 2)
-    }
-  }
-
-
-  display(c) {
-    let bw = GUI.config.band_width / 2
-    if (this.val > 0.5 - bw && this.val < 0.5 + bw) {
-      //stroke(palette[index % palette.length]);
-      //if (index === 2) stroke(255, 25, 20, 20);
-      //else stroke(20, 10);
-      c.push();
-      c.translate(this.pos.x, this.pos.y + 10 - this.altitude * 40 * map(this.pos.y, 0, height + 100 * GUI.config.zoom, 1, 4));
-      c.rotate(this.angle);
-
-      c.point(0, 0)
-      // randomGaussian(0, 0.05),
-      // randomGaussian(0, 0.05))
-      // c.point(0, 0);
-      c.pop();
-    }
   }
 }
