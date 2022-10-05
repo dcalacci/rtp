@@ -38,6 +38,7 @@ function redrawSketch() {
 function setup() {
   randomSeed(1243);
   colorMode(HSB);
+  frameRate(60)
 
   rng = d3.randomLcg(random())
 
@@ -58,29 +59,28 @@ function setup() {
 }
 
 let Line = []
-
 let Shapes = []
 
 function draw() {
   noFill();
-  // fill(255, 0, 0)
-  // console.log("drawwing...")
-
   push()
   background(200)
   // Draw here
   if (mouseIsPressed) {
     // console.log("mouse pressed...")
     // better approach is to use currentTime() here to adjust what points can close a shape
-    Line.push([mouseX, mouseY]);
-    let oldLine = _.take(Line, Line.length - 50)
+    Line.push([mouseX, mouseY, millis()]);
+    // limit to 2 secs ago
+    let oldLine = _.filter(Line, (p) => ((millis() - p[2]) / 1000) > 2)
+    // let oldLine = _.take(Line, Line.length - 50)
 
-    let lastPointIdx = _.findLastIndex(oldLine, xy => Math.abs((xy[0] - mouseX)) < 1 && Math.abs(xy[1] - mouseY) < 1)
+    // last point within a radius of the mouse
+    let lastPointIdx = _.findLastIndex(oldLine, xy =>
+      Math.abs((xy[0] - mouseX)) < 2 &&
+      Math.abs(xy[1] - mouseY) < 2)
     if (lastPointIdx > 0) {
-      console.log("CLOSED SHAPE")
-      console.log(lastPointIdx, mouseX, mouseY)
-      let ShapeLine = _.slice(oldLine, start = lastPointIdx)
-      console.log("shapeline length", ShapeLine.length)
+      // get 
+      let ShapeLine = _.slice(Line, start = lastPointIdx)
       Shapes.push(ShapeLine)
       Line = Line.slice(start = 0, end = lastPointIdx)
       endShape()
@@ -91,28 +91,24 @@ function draw() {
   for (let j = 0; j < Shapes.length; j++) {
     push()
     fill(0, 0, 0)
-    console.log("shape velocity:", settings.shapeVelocity)
+    // console.log("shape velocity:", settings.shapeVelocity)
     for (let i = 0; i < Shapes[j].length; i++) {
-      Shapes[j][i][0] += map(noise(noise(frameCount * 17362)), 0, 1, -1, 1) * GUI.config.shapeVelocity;
+      Shapes[j][i][0] += map(noise(noise(frameCount * 1235)), 0, 1, -1, 1) * GUI.config.shapeVelocity;
       Shapes[j][i][1] += map(noise(noise(frameCount * 1224458)), 0, 1, -1, 1) * GUI.config.shapeVelocity;
     }
     beginShape()
-    Shapes[j].map(xy => vertex(...xy))
+    Shapes[j].map(xy => curveVertex(...xy))
     endShape(CLOSE)
     pop()
   }
 
-  // for (let i = 0; i < Line.length; i++) {
-  //   Line[i][0] += map(noise(frameCount * 17362), 0, 1, -1, 1);
-  //   Line[i][1] += map(noise(frameCount * 12341234), 0, 1, -1, 1);
-  // }
   beginShape();
 
   //TODO: if I don't want the line to "continue",
   // we need to create "new" lines but still draww the old ones
   // so make an array of Lines, split whenever a shape is made, then
   // in the loop draw all old lines AND check for collisions.
-  Line.map(xy => vertex(...xy))
+  Line.map(([x, y, t]) => vertex(x, y))
   // Line.map(xy => c.vertex(...xy))
   // ^ alternatively you can use this shorter syntax: Line.map(xy=>vertex(...xy));
   endShape();
