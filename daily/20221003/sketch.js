@@ -38,7 +38,6 @@ function redrawSketch() {
 function setup() {
   randomSeed(1243);
   colorMode(HSB);
-  frameRate(60)
 
   rng = d3.randomLcg(random())
 
@@ -64,41 +63,70 @@ let Shapes = []
 function draw() {
   noFill();
   push()
-  background(200)
+  background(50)
+  strokeWeight(5)
   // Draw here
   if (mouseIsPressed) {
     // console.log("mouse pressed...")
     // better approach is to use currentTime() here to adjust what points can close a shape
     Line.push([mouseX, mouseY, millis()]);
     // limit to 2 secs ago
-    let oldLine = _.filter(Line, (p) => ((millis() - p[2]) / 1000) > 2)
+    let oldLine = _.filter(Line, (p) => ((millis() - p[2]) / 1000) > 0.5)
     // let oldLine = _.take(Line, Line.length - 50)
 
     // last point within a radius of the mouse
     let lastPointIdx = _.findLastIndex(oldLine, xy =>
       Math.abs((xy[0] - mouseX)) < 2 &&
       Math.abs(xy[1] - mouseY) < 2)
+
     if (lastPointIdx > 0) {
-      // get 
       let ShapeLine = _.slice(Line, start = lastPointIdx)
-      Shapes.push(ShapeLine)
+      Shapes.push({
+        vertices: _.map(ShapeLine, ([x, y, t]) => [mouseX - x, mouseY - y, t]),
+        noise: noise(noise(millis())),
+        vNum: ShapeLine.length,
+        vX: cos(noise(noise(millis()))) * random(1, -1),
+        vY: sin(noise((millis()))) * random(1, -1),
+        x: mouseX,
+        y: mouseY,
+        rotateSpeed: 100,
+        t: millis()
+      })
       Line = Line.slice(start = 0, end = lastPointIdx)
       endShape()
     }
   }
 
-  // console.log("drawing shapes:", Shapes[0])
   for (let j = 0; j < Shapes.length; j++) {
+    let Shape = Shapes[j]
     push()
+    scale(map((millis() - Shape.t) / 1000, 0, 6, 1, 0))
+    translate(Shape.x, Shape.y)
+    push()
+    let dr = TWO_PI / Shape.vNum
+    // fill(0, 0, 0)
+
+    blendMode(SCREEN)
+    strokeWeight(10)
     fill(0, 0, 0)
-    // console.log("shape velocity:", settings.shapeVelocity)
-    for (let i = 0; i < Shapes[j].length; i++) {
-      Shapes[j][i][0] += map(noise(noise(frameCount * 1235)), 0, 1, -1, 1) * GUI.config.shapeVelocity;
-      Shapes[j][i][1] += map(noise(noise(frameCount * 1224458)), 0, 1, -1, 1) * GUI.config.shapeVelocity;
-    }
+    fill((j * 40 + (millis() - Shape.t) * 0.1) % 360, 69, 100, 80);
+    stroke((j * 40 + (millis() - Shape.t) * 0.1) % 360, 69, 100, 20);
+    rotate(frameCount / Shape.rotateSpeed)
     beginShape()
-    Shapes[j].map(xy => curveVertex(...xy))
+    // downsampling...
+    Shape.vertices = _.sortBy(_.sampleSize(Shape.vertices, Shape.vNum), x => x[2])
+    for (let i = 0; i < Shape.vertices.length; i++) {
+      curveVertex(
+        Shape.vertices[i][0] + 20 * cos(noise(i * (millis() - Shape.t) / 5000)),
+        Shape.vertices[i][1] + 20 * sin(noise(i * (millis() - Shape.t) / 5000)))
+    }
     endShape(CLOSE)
+    // if (frameCount % 10 == 0) {
+    //   Shape.vNum -= random(1, 3)
+    // }
+    Shape.x += Shape.vX
+    Shape.y += Shape.vY
+    pop()
     pop()
   }
 
