@@ -9,6 +9,7 @@ let colors = ["#FFA69E", "#9CAFB7", "#344055", "#E9EB9E", "#A30000", "#303030"]
 
 const settings = {
   exampleSetting: [1., 0, 10, 0.1],
+  shapeVelocity: [1., 0, 10, 0.1]
 }
 
 const settingValues = _.mapValues(settings, (o) => o[0])
@@ -90,16 +91,21 @@ function draw() {
   for (let j = 0; j < Shapes.length; j++) {
     push()
     fill(0, 0, 0)
+    console.log("shape velocity:", settings.shapeVelocity)
+    for (let i = 0; i < Shapes[j].length; i++) {
+      Shapes[j][i][0] += map(noise(noise(frameCount * 17362)), 0, 1, -1, 1) * GUI.config.shapeVelocity;
+      Shapes[j][i][1] += map(noise(noise(frameCount * 1224458)), 0, 1, -1, 1) * GUI.config.shapeVelocity;
+    }
     beginShape()
     Shapes[j].map(xy => vertex(...xy))
     endShape(CLOSE)
     pop()
   }
 
-  for (let i = 0; i < Line.length; i++) {
-    Line[i][0] += map(noise(frameCount * 17362), 0, 1, -1, 1);
-    Line[i][1] += map(noise(frameCount * 12341234), 0, 1, -1, 1);
-  }
+  // for (let i = 0; i < Line.length; i++) {
+  //   Line[i][0] += map(noise(frameCount * 17362), 0, 1, -1, 1);
+  //   Line[i][1] += map(noise(frameCount * 12341234), 0, 1, -1, 1);
+  // }
   beginShape();
 
   //TODO: if I don't want the line to "continue",
