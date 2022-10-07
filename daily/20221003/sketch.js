@@ -63,6 +63,7 @@ let Shapes = []
 function draw() {
   noFill();
   push()
+  stroke("#EFAF0E")
   background(50)
   strokeWeight(5)
   // Draw here
