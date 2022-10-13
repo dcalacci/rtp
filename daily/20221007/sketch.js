@@ -12,8 +12,8 @@ const PI = Math.PI
 const settings = {
   min_split: [2, 1, 10, 1],
   max_split: [5, 2, 20, 1],
-  gen_start: [3, 1, 10, 1],
-  gen_max: [10, 5, 20, 1],
+  gen_start: [1, 1, 10, 1],
+  gen_max: [4, 5, 20, 1],
   min_generation_branch_skip: [4, 1, 10, 1],
   min_branch_angle: [PI / 8, 0, PI / 4, PI / 24],
   max_branch_angle: [PI / 8, 0, PI / 4, PI / 24],
@@ -76,9 +76,9 @@ function draw() {
   c.background(240)
   // Draw here
 
-  for (let index = 1; index <= amount; index++) {
+  for (let index = 1; index <= 2; index++) {
     c.push();
-    const tree = new Tree(c, createVector(c.width / 2, height), 200);
+    const tree = new Tree({ c, start: createVector(c.width / 2, height), len: 200 });
     trees.push(tree);
     c.pop();
   }
@@ -90,9 +90,18 @@ function draw() {
 }
 
 
+//TODO:
+// 1. Instead of lines, draw circles of decreasing width.
+// When a tree splits, the split should follow the natural
+// width of the trunk.
+// 2. Branches shouldn't be straight. They should wiggle.
+// 3. Add another kind of tree:
+// https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2F736x%2Ffb%2F68%2F55%2Ffb6855fcfa1cdfdda2a4a9548d94e16f--tattoo-tree-site-analysis.jpg&f=1&nofb=1&ipt=d8297c76a739319c981aeda5f85a488a42e58d97e90976508bb227f767e618a5&ipo=images
+// for example one big trunk. Branches are basically 90 deg. length is exponentially decaying. maybe
+// results in a pine-looking tree.
 
 class Tree {
-  constructor(c, start, len, angle = 0, gen = GUI.config.gen_start, weight = GUI.config.weight) {
+  constructor({ c, start, len, angle = 0, gen = GUI.config.gen_start, weight = GUI.config.weight }) {
 
     this.c = c
     this.start = start
@@ -110,7 +119,6 @@ class Tree {
     this.max_split = GUI.config.max_split
     this.gen_max = GUI.config.gen_max
     this.min_gen_skip = GUI.config.min_generation_branch_skip
-
 
     if (this.gen < this.gen_max) {
       let splitAmount = random(this.min_split, this.max_split);
@@ -142,13 +150,14 @@ class Tree {
 
   createBranch(angle) {
     this.c.push()
-    let newBranch = new Tree(
-      this.c,
-      this.end,
-      this.len * random(0.2, 0.9),
-      this.angle - angle,
-      this.gen + 1,
-      this.weight * random(0.6, 0.9));
+    let newBranch = new Tree({
+      c: this.c,
+      start: this.end,
+      len: this.len * random(0.2, 0.9),
+      angle: this.angle - angle,
+      gen: this.gen + 1,
+      weight: this.weight * random(0.6, 0.9)
+    });
     this.branches.push(newBranch);
     newBranch.draw();
     this.c.pop()
